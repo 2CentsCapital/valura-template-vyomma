@@ -1,0 +1,76 @@
+{
+  "fonts": [
+    {
+      "family": "Open Sans",
+      "style": "Light",
+      "fontId": "C:\\USERS\\SHIBA\\APPDATA\\LOCAL\\MICROSOFT\\WINDOWS\\FONTS\\OPENSANS-LIGHT.TTF",
+      "source": "LOCAL"
+    },
+    {
+      "family": "Inter",
+      "style": "Regular",
+      "fontId": "Inter_1",
+      "source": "GOOGLE"
+    },
+    {
+      "family": "Plus Jakarta Sans",
+      "style": "SemiBold",
+      "fontId": "C:\\USERS\\SHIBA\\APPDATA\\LOCAL\\MICROSOFT\\WINDOWS\\FONTS\\PLUSJAKARTASANS-SEMIBOLD.TTF",
+      "source": "LOCAL"
+    },
+    {
+      "family": "Inter",
+      "style": "Bold",
+      "fontId": "Inter_1",
+      "source": "GOOGLE"
+    },
+    {
+      "family": "Plus Jakarta Sans",
+      "style": "ExtraBold",
+      "fontId": "C:\\USERS\\SHIBA\\APPDATA\\LOCAL\\MICROSOFT\\WINDOWS\\FONTS\\PLUSJAKARTASANS-EXTRABOLD.TTF",
+      "source": "LOCAL"
+    },
+    {
+      "family": "Plus Jakarta Sans",
+      "style": "Regular",
+      "fontId": "C:\\USERS\\SHIBA\\APPDATA\\LOCAL\\MICROSOFT\\WINDOWS\\FONTS\\PLUSJAKARTASANS-REGULAR.TTF",
+      "source": "LOCAL"
+    },
+    {
+      "family": "Plus Jakarta Sans",
+      "style": "Bold",
+      "fontId": "C:\\USERS\\SHIBA\\APPDATA\\LOCAL\\MICROSOFT\\WINDOWS\\FONTS\\PLUSJAKARTASANS-BOLD.TTF",
+      "source": "LOCAL"
+    },
+    {
+      "family": "Inter",
+      "style": "Semi Bold",
+      "fontId": "Inter_1",
+      "source": "GOOGLE"
+    },
+    {
+      "family": "Inter",
+      "style": "Extra Bold",
+      "fontId": "Inter_1",
+      "source": "GOOGLE"
+    },
+    {
+      "family": "Clash Grotesk",
+      "style": "Medium",
+      "fontId": "C:\\USERS\\SHIBA\\APPDATA\\LOCAL\\MICROSOFT\\WINDOWS\\FONTS\\CLASHGROTESK-MEDIUM.OTF",
+      "source": "LOCAL"
+    },
+    {
+      "family": "Plus Jakarta Sans",
+      "style": "Medium",
+      "fontId": "C:\\USERS\\SHIBA\\APPDATA\\LOCAL\\MICROSOFT\\WINDOWS\\FONTS\\PLUSJAKARTASANS-MEDIUM.TTF",
+      "source": "LOCAL"
+    },
+    {
+      "family": "Inter",
+      "style": "Medium",
+      "fontId": "Inter_1",
+      "source": "GOOGLE"
+    }
+  ]
+}

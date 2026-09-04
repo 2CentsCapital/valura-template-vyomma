@@ -1,0 +1,105 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: "Open Sans:Light";
+  font-style: normal;
+  font-weight: 300;
+  src: url("https://static.figma.com/font/OpenSans_wdth_wght__2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter:Regular";
+  font-style: normal;
+  font-weight: 400;
+  src: url("https://static.figma.com/font/Inter_1") format("woff2");
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans:SemiBold";
+  font-style: normal;
+  font-weight: 600;
+  src: url("https://static.figma.com/font/PlusJakartaSans_wght__2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter:Bold";
+  font-style: normal;
+  font-weight: 700;
+  src: url("https://static.figma.com/font/Inter_1") format("woff2");
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans:ExtraBold";
+  font-style: normal;
+  font-weight: 800;
+  src: url("https://static.figma.com/font/PlusJakartaSans_wght__2") format("woff2");
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans:Regular";
+  font-style: normal;
+  font-weight: 400;
+  src: url("https://static.figma.com/font/PlusJakartaSans_wght__2") format("woff2");
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans:Bold";
+  font-style: normal;
+  font-weight: 700;
+  src: url("https://static.figma.com/font/PlusJakartaSans_wght__2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter:Semi Bold";
+  font-style: normal;
+  font-weight: 600;
+  src: url("https://static.figma.com/font/Inter_1") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter:Extra Bold";
+  font-style: normal;
+  font-weight: 800;
+  src: url("https://static.figma.com/font/Inter_1") format("woff2");
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans:Medium";
+  font-style: normal;
+  font-weight: 500;
+  src: url("https://static.figma.com/font/PlusJakartaSans_wght__2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter:Medium";
+  font-style: normal;
+  font-weight: 500;
+  src: url("https://static.figma.com/font/Inter_1") format("woff2");
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
