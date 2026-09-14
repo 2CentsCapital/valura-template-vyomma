@@ -7,6 +7,7 @@ import {
 } from "react"
 import SplitText from "../ui/SplitText"
 import StoreButtons from "../common/StoreButtons"
+import Reveal from "../../motion/Reveal"
 import { APP_URL, LEAD_FORM_ID, brand, leadForm } from "../../config/site"
 import { facts } from "../../content/facts"
 
@@ -63,11 +64,11 @@ function validate(values: Values): Errors {
 }
 
 const inputClass = (invalid: boolean) =>
-  `bg-slate-50 border rounded-[10px] h-[46px] sm:h-[47px] px-[16px] font-display text-[15px] text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow w-full ${
+  `bg-slate-50 border rounded-[10px] h-[46px] sm:h-[47px] px-[16px] font-display text-[15px] text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow duration-200 w-full ${
     invalid ? "border-red-600" : "border-slate-300"
   }`
 
-type FieldProps = {
+interface FieldProps {
   name: "name" | "phone" | "email"
   label: string
   type: "text" | "tel" | "email"
@@ -118,7 +119,7 @@ function Field({
         <p
           id={errorId}
           data-field-error
-          className="font-display text-[12.5px] font-medium text-red-700"
+          className="fade-down font-display text-[12.5px] font-medium text-red-700"
         >
           {error}
         </p>
@@ -246,27 +247,41 @@ export default function OpenAccount() {
     >
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
         <div className="w-full lg:w-[50%] flex flex-col items-start text-white">
-          <p className="flex items-center gap-2 mb-4 sm:mb-[20px] font-display text-[11px] sm:text-[12px] font-extrabold uppercase tracking-[1.44px] text-indigo-100">
+          <Reveal
+            as="p"
+            y={12}
+            className="flex items-center gap-2 mb-4 sm:mb-[20px] font-display text-[11px] sm:text-[12px] font-extrabold uppercase tracking-[1.44px] text-indigo-100"
+          >
             <span aria-hidden="true">❖</span> Open an account
-          </p>
+          </Reveal>
 
           <SplitText
             id="open-title"
             text="Ready to take your portfolio global?"
             tag="h2"
-            className="font-display font-extrabold text-[28px] sm:text-[38px] md:text-[44px] lg:text-[48px] leading-[1.2] tracking-[-0.96px] mb-4 sm:mb-[20px]"
             splitType="chars"
             textAlign="left"
+            className="font-display font-extrabold text-[28px] sm:text-[38px] md:text-[44px] lg:text-[48px] leading-[1.2] tracking-[-0.96px] mb-4 sm:mb-[20px]"
           />
 
-          <p className="font-display text-[15px] sm:text-[17px] md:text-[18px] text-indigo-50 mb-6 sm:mb-[36px]">
+          <Reveal
+            as="p"
+            delay={100}
+            className="font-display text-[15px] sm:text-[17px] md:text-[18px] text-indigo-50 mb-6 sm:mb-[36px]"
+          >
             Fully digital and regulated at GIFT City. Leave your details and a
             specialist takes it from there.
-          </p>
+          </Reveal>
 
           <ul className="flex flex-col gap-3.5 sm:gap-[18px] w-full">
-            {CHECKLIST.map((item) => (
-              <li key={item} className="flex items-center gap-3 sm:gap-[14px]">
+            {CHECKLIST.map((item, index) => (
+              <Reveal
+                as="li"
+                key={item}
+                delay={160 + index * 70}
+                y={12}
+                className="flex items-center gap-3 sm:gap-[14px]"
+              >
                 <span
                   aria-hidden="true"
                   className="font-display font-black text-[15px] sm:text-[17px] shrink-0 text-emerald-300"
@@ -276,32 +291,43 @@ export default function OpenAccount() {
                 <span className="font-display font-medium text-[15px] sm:text-[17px]">
                   {item}
                 </span>
-              </li>
+              </Reveal>
             ))}
           </ul>
 
           {APP_URL && (
-            <a
-              href={APP_URL}
-              className="mt-8 inline-flex items-center gap-2 rounded-[12px] border border-white/60 px-5 py-2.5 font-display font-bold text-[15px] text-white hover:bg-white/10 transition-colors"
-            >
-              Open your account online <span aria-hidden="true">→</span>
-            </a>
+            <Reveal delay={200} y={12} className="mt-8">
+              <a
+                href={APP_URL}
+                className="inline-flex items-center gap-2 rounded-[12px] border border-white/60 px-5 py-2.5 font-display font-bold text-[15px] text-white hover:bg-white/10 transition-colors duration-300"
+              >
+                Open your account online{" "}
+                <span aria-hidden="true" className="nudge">
+                  →
+                </span>
+              </a>
+            </Reveal>
           )}
 
-          <StoreButtons
-            tone="dark"
-            label="Or invest on the go: get the Valura.Ai app"
-            className="mt-8 sm:mt-10"
-          />
+          <Reveal delay={240} y={12} className="mt-8 sm:mt-10">
+            <StoreButtons
+              tone="dark"
+              label="Or invest on the go: get the Valura.Ai app"
+            />
+          </Reveal>
         </div>
 
-        <div className="w-full lg:w-[48%] flex justify-center lg:justify-end">
+        <Reveal
+          delay={120}
+          y={32}
+          duration={800}
+          className="w-full lg:w-[48%] flex justify-center lg:justify-end"
+        >
           <div className="on-light bg-white rounded-2xl sm:rounded-[24px] p-6 sm:p-8 md:p-[40px] w-full max-w-[536px] shadow-[0_25px_25px_rgba(0,0,0,0.35)]">
             {status === "success" ? (
               <div role="status" className="flex flex-col items-start">
                 <span
-                  className="flex size-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700"
+                  className="pop-in flex size-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700"
                   aria-hidden="true"
                 >
                   <svg
@@ -331,10 +357,12 @@ export default function OpenAccount() {
                 {APP_URL ? (
                   <a
                     href={APP_URL}
-                    className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-blue-900 px-5 py-3 font-display font-bold text-[15px] text-white hover:bg-blue-800 transition-colors"
+                    className="btn-sheen mt-6 inline-flex items-center gap-2 rounded-[10px] bg-blue-900 px-5 py-3 font-display font-bold text-[15px] text-white hover:bg-blue-800 transition-colors duration-300"
                   >
                     Continue to open your account{" "}
-                    <span aria-hidden="true">→</span>
+                    <span aria-hidden="true" className="nudge">
+                      →
+                    </span>
                   </a>
                 ) : (
                   <StoreButtons
@@ -372,7 +400,7 @@ export default function OpenAccount() {
                 {status === "error" && serverMessage && (
                   <p
                     role="alert"
-                    className="rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 font-display text-[14px] text-red-800"
+                    className="fade-down rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 font-display text-[14px] text-red-800"
                   >
                     {serverMessage}
                   </p>
@@ -467,7 +495,7 @@ export default function OpenAccount() {
                   type="submit"
                   disabled={submitting}
                   aria-busy={submitting}
-                  className="mt-2 bg-blue-900 hover:bg-blue-800 disabled:opacity-80 disabled:cursor-wait transition-colors text-white font-display font-bold text-[15px] sm:text-[16px] py-3.5 sm:py-[14px] rounded-[10px] flex items-center justify-center gap-2 active:scale-[0.98]"
+                  className="btn-sheen mt-2 bg-blue-900 hover:bg-blue-800 disabled:opacity-80 disabled:cursor-wait transition-[background-color,scale] duration-300 text-white font-display font-bold text-[15px] sm:text-[16px] py-3.5 sm:py-[14px] rounded-[10px] flex items-center justify-center gap-2 active:scale-[0.98]"
                 >
                   {submitting ? (
                     <>
@@ -475,7 +503,10 @@ export default function OpenAccount() {
                     </>
                   ) : (
                     <>
-                      Contact us <span aria-hidden="true">→</span>
+                      Contact us{" "}
+                      <span aria-hidden="true" className="nudge">
+                        →
+                      </span>
                     </>
                   )}
                 </button>
@@ -488,7 +519,7 @@ export default function OpenAccount() {
               </form>
             )}
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   )

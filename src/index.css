@@ -357,9 +357,9 @@ textarea {
   .shelf-card::before {
     content: "";
     position: absolute;
-    inset: -6px;
+    inset: 0;
     z-index: -1;
-    border-radius: 22px;
+    border-radius: 20px;
     background: #ffffff;
     box-shadow: 0 22px 44px -22px rgb(15 23 42 / 0.28);
     opacity: 0;
@@ -446,9 +446,14 @@ html[data-motion="paused"] [data-reveal] {
   transition: none;
 }
 
+html[data-motion="paused"] .donut-turn,
+html[data-motion="paused"] .nav-indicator,
+html[data-motion="paused"] .site-header::after {
+  transition: none;
+}
+
 html[data-motion="paused"] .donut-turn {
   transform: none;
-  transition: none;
 }
 
 html[data-motion="paused"] :is(.animate-marquee, .float-soft, .hero-glow, .bob) {

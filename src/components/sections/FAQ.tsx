@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
 import SplitText from "../ui/SplitText"
+import Reveal from "../../motion/Reveal"
 import { APP_URL, LEAD_FORM_ID, brand, legal } from "../../config/site"
 import { facts } from "../../content/facts"
 
@@ -59,33 +60,48 @@ export default function FAQ() {
     >
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row gap-12 lg:gap-20">
         <div className="w-full lg:w-[45%] flex flex-col items-start">
-          <p className="bg-[#eef2ff] rounded-full px-3.5 sm:px-4 py-1 sm:py-1.5 mb-4 sm:mb-5 font-display font-extrabold text-xs sm:text-[13px] text-indigo-700">
+          <Reveal
+            as="p"
+            y={12}
+            className="bg-[#eef2ff] rounded-full px-3.5 sm:px-4 py-1 sm:py-1.5 mb-4 sm:mb-5 font-display font-extrabold text-xs sm:text-[13px] text-indigo-700"
+          >
             Good to know
-          </p>
+          </Reveal>
 
           <SplitText
             id="faq-title"
             text="Questions, answered simply."
             tag="h2"
-            className="font-display font-extrabold text-[28px] sm:text-[36px] md:text-[44px] text-slate-900 leading-[1.2] tracking-[-0.88px] mb-2 sm:mb-3 max-w-[490px]"
             splitType="chars"
             textAlign="left"
+            className="font-display font-extrabold text-[28px] sm:text-[36px] md:text-[44px] text-slate-900 leading-[1.2] tracking-[-0.88px] mb-2 sm:mb-3 max-w-[490px]"
           />
-          <p className="font-display text-[14px] sm:text-[16px] text-[#475569] leading-[1.6] mb-5 sm:mb-8 lg:mb-[32px] max-w-[420px]">
+          <Reveal
+            as="p"
+            delay={100}
+            className="font-display text-[14px] sm:text-[16px] text-[#475569] leading-[1.6] mb-5 sm:mb-8 lg:mb-[32px] max-w-[420px]"
+          >
             Everything you need to know about investing globally with{" "}
             {brand.fullName}.
-          </p>
+          </Reveal>
 
-          <a
-            href={`#${LEAD_FORM_ID}`}
-            className="bg-[#eef2ff] hover:bg-indigo-100 transition-colors rounded-full px-5 sm:px-7 py-2.5 sm:py-3 mb-8 sm:mb-12 lg:mb-16 font-display font-bold text-sm sm:text-[15px] text-indigo-700"
-          >
-            Still have a question? Talk to us
-          </a>
+          <Reveal delay={160} y={12} className="mb-8 sm:mb-12 lg:mb-16">
+            <a
+              href={`#${LEAD_FORM_ID}`}
+              className="inline-block bg-[#eef2ff] hover:bg-indigo-100 transition-colors duration-300 rounded-full px-5 sm:px-7 py-2.5 sm:py-3 font-display font-bold text-sm sm:text-[15px] text-indigo-700"
+            >
+              Still have a question? Talk to us{" "}
+              <span aria-hidden="true" className="nudge">
+                →
+              </span>
+            </a>
+          </Reveal>
 
-          <div
+          {/* The question marks bob gently, each on its own phase */}
+          <Reveal
+            delay={220}
+            y={20}
             className="relative w-[180px] sm:w-[220px] h-[140px] sm:h-[170px] mt-2 sm:mt-[20px] mx-auto lg:mx-0"
-            aria-hidden="true"
           >
             <svg
               width="100%"
@@ -93,38 +109,51 @@ export default function FAQ() {
               viewBox="0 0 200 200"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
               focusable="false"
             >
-              <circle cx="40" cy="40" r="16" fill="#fca5a5" />
-              <g transform="translate(30, 100) rotate(-15)">
-                <path
-                  d="M0 0 C0 -25, 35 -25, 35 0 C35 25, 17.5 25, 17.5 45"
-                  stroke="#fbbf24"
-                  strokeWidth="14"
-                  strokeLinecap="round"
-                />
-                <circle cx="17.5" cy="65" r="8" fill="#fbbf24" />
+              <circle
+                cx="40"
+                cy="40"
+                r="16"
+                fill="#fca5a5"
+                className="bob bob-2"
+              />
+              <g className="bob">
+                <g transform="translate(30, 100) rotate(-15)">
+                  <path
+                    d="M0 0 C0 -25, 35 -25, 35 0 C35 25, 17.5 25, 17.5 45"
+                    stroke="#fbbf24"
+                    strokeWidth="14"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="17.5" cy="65" r="8" fill="#fbbf24" />
+                </g>
               </g>
-              <g transform="translate(120, 100) rotate(15)">
-                <path
-                  d="M0 0 C0 -25, 35 -25, 35 0 C35 25, 17.5 25, 17.5 45"
-                  stroke="#6ee7b7"
-                  strokeWidth="14"
-                  strokeLinecap="round"
-                />
-                <circle cx="17.5" cy="65" r="8" fill="#6ee7b7" />
+              <g className="bob bob-3">
+                <g transform="translate(120, 100) rotate(15)">
+                  <path
+                    d="M0 0 C0 -25, 35 -25, 35 0 C35 25, 17.5 25, 17.5 45"
+                    stroke="#6ee7b7"
+                    strokeWidth="14"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="17.5" cy="65" r="8" fill="#6ee7b7" />
+                </g>
               </g>
-              <g transform="translate(70, 80)">
-                <path
-                  d="M0 0 C0 -35, 50 -35, 50 0 C50 35, 25 35, 25 55"
-                  stroke="#8b5cf6"
-                  strokeWidth="18"
-                  strokeLinecap="round"
-                />
-                <circle cx="25" cy="80" r="10" fill="#8b5cf6" />
+              <g className="bob bob-2">
+                <g transform="translate(70, 80)">
+                  <path
+                    d="M0 0 C0 -35, 50 -35, 50 0 C50 35, 25 35, 25 55"
+                    stroke="#8b5cf6"
+                    strokeWidth="18"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="25" cy="80" r="10" fill="#8b5cf6" />
+                </g>
               </g>
             </svg>
-          </div>
+          </Reveal>
         </div>
 
         <div className="w-full lg:w-[55%] flex flex-col gap-3.5 sm:gap-[18px]">
@@ -133,53 +162,57 @@ export default function FAQ() {
             const buttonId = `faq-question-${index}`
             const panelId = `faq-answer-${index}`
             return (
-              <div
+              <Reveal
                 key={faq.question}
-                className={`rounded-xl sm:rounded-[16px] border transition-colors duration-300 ${
-                  isOpen
-                    ? "bg-white border-indigo-400 shadow-[0_4px_7px_rgba(0,0,0,0.04)]"
-                    : "bg-slate-50 border-slate-200 hover:border-indigo-300"
-                }`}
+                delay={Math.min(index, 6) * 60}
+                y={16}
+                duration={600}
               >
-                <h3>
-                  <button
-                    id={buttonId}
-                    type="button"
-                    aria-expanded={isOpen}
-                    aria-controls={panelId}
-                    onClick={() => setOpenIndex(isOpen ? null : index)}
-                    className="flex w-full items-center justify-between gap-3 rounded-xl sm:rounded-[16px] px-4 sm:px-6 py-4 sm:py-[22px] text-left font-display font-bold text-[15px] sm:text-[17px] text-slate-900 tracking-[-0.34px]"
-                  >
-                    <span>{faq.question}</span>
-                    <ChevronDown
-                      size={18}
-                      aria-hidden="true"
-                      className={`shrink-0 text-slate-500 transition-transform duration-300 ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                </h3>
                 <div
-                  id={panelId}
-                  role="region"
-                  aria-labelledby={buttonId}
-                  inert={!isOpen}
-                  className={`grid transition-[grid-template-rows,visibility] duration-300 ease-out ${
+                  className={`rounded-xl sm:rounded-[16px] border transition-colors duration-300 ${
                     isOpen
-                      ? "grid-rows-[1fr] visible"
-                      : "grid-rows-[0fr] invisible"
+                      ? "bg-white border-indigo-400 shadow-[0_4px_7px_rgba(0,0,0,0.04)]"
+                      : "bg-slate-50 border-slate-200 hover:border-indigo-300"
                   }`}
                 >
-                  <div className="overflow-hidden">
-                    <div className="mx-4 sm:mx-6 mb-4 sm:mb-[22px] pt-3 sm:pt-[16px] border-t border-slate-100">
-                      <p className="font-display text-[14px] md:text-[15px] text-slate-600 leading-[1.6]">
-                        {faq.answer}
-                      </p>
+                  <h3>
+                    <button
+                      id={buttonId}
+                      type="button"
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      onClick={() => setOpenIndex(isOpen ? null : index)}
+                      className="flex w-full items-center justify-between gap-3 rounded-xl sm:rounded-[16px] px-4 sm:px-6 py-4 sm:py-[22px] text-left font-display font-bold text-[15px] sm:text-[17px] text-slate-900 tracking-[-0.34px]"
+                    >
+                      <span>{faq.question}</span>
+                      <ChevronDown
+                        size={18}
+                        aria-hidden="true"
+                        className={`shrink-0 text-slate-500 transition-transform duration-[420ms] ease-out-quint ${
+                          isOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                  </h3>
+                  {/* The answer opens by animating its height, and its text fades in */}
+                  <div
+                    id={panelId}
+                    role="region"
+                    aria-labelledby={buttonId}
+                    inert={!isOpen}
+                    data-open={isOpen}
+                    className="faq-panel"
+                  >
+                    <div className="overflow-hidden">
+                      <div className="faq-panel-inner mx-4 sm:mx-6 mb-4 sm:mb-[22px] pt-3 sm:pt-[16px] border-t border-slate-100">
+                        <p className="font-display text-[14px] md:text-[15px] text-slate-600 leading-[1.6]">
+                          {faq.answer}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Reveal>
             )
           })}
         </div>

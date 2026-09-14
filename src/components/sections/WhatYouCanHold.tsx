@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import SplitText from "../ui/SplitText"
+import Reveal from "../../motion/Reveal"
 import { facts } from "../../content/facts"
 
 type Shelf = {
@@ -9,13 +10,12 @@ type Shelf = {
   icon: ReactNode
 }
 
-function ShelfIcon({
-  stroke,
-  children,
-}: {
+interface ShelfIconProps {
   stroke: string
   children: ReactNode
-}) {
+}
+
+function ShelfIcon({ stroke, children }: ShelfIconProps) {
   return (
     <svg
       width="24"
@@ -118,44 +118,59 @@ export default function WhatYouCanHold() {
     >
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
         <div className="max-w-[780px] text-center mb-8 sm:mb-12 lg:mb-[72px]">
-          <p className="mb-3 font-sans text-[12px] sm:text-[13px] font-bold uppercase tracking-[1.2px] text-brand-blue-deep">
+          <Reveal
+            as="p"
+            y={12}
+            className="mb-3 font-sans text-[12px] sm:text-[13px] font-bold uppercase tracking-[1.2px] text-brand-blue-deep"
+          >
             What you can hold
-          </p>
+          </Reveal>
           <SplitText
             id="invest-title"
             text={`One account. ${facts.markets} global markets.`}
             tag="h2"
-            className="font-display font-extrabold text-[28px] sm:text-[34px] md:text-[44px] text-[#0f172a] leading-[1.25] tracking-[-0.88px] mb-2.5 sm:mb-[16px]"
             splitType="chars"
             textAlign="center"
+            className="font-display font-extrabold text-[28px] sm:text-[34px] md:text-[44px] text-[#0f172a] leading-[1.25] tracking-[-0.88px] mb-2.5 sm:mb-[16px]"
           />
-          <p className="font-display text-[15px] sm:text-[16px] md:text-[18px] text-[#475569] leading-[1.6] px-1 sm:px-0">
+          <Reveal
+            as="p"
+            delay={100}
+            className="font-display text-[15px] sm:text-[16px] md:text-[18px] text-[#475569] leading-[1.6] px-1 sm:px-0"
+          >
             Six shelves under one IFSCA-regulated account. No second login, no
             overseas bank account.
-          </p>
+          </Reveal>
         </div>
 
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-x-[40px] lg:gap-y-[56px] w-full max-w-[1200px]">
-          {SHELVES.map((shelf) => (
-            <li
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-x-[40px] lg:gap-y-[48px] w-full max-w-[1200px]">
+          {SHELVES.map((shelf, index) => (
+            <Reveal
+              as="li"
               key={shelf.title}
-              className="bg-white sm:bg-transparent rounded-2xl sm:rounded-none p-5 sm:p-2 border border-slate-200/70 sm:border-none shadow-xs sm:shadow-none flex flex-col items-center text-center"
+              delay={(index % 3) * 90}
+              y={28}
+              className="flex"
             >
-              <div
-                className={`size-12 sm:size-14 md:size-[60px] rounded-xl sm:rounded-2xl md:rounded-[30px] flex items-center justify-center shadow-xs mb-3 sm:mb-[20px] lg:mb-[24px] shrink-0 ${shelf.iconBg}`}
-              >
-                {shelf.icon}
+              {/* Lifts on hover, with a white panel and shadow fading in behind it on larger screens */}
+              <div className="shelf-card lift-card relative w-full bg-white sm:bg-transparent rounded-2xl sm:rounded-[20px] p-5 sm:p-4 border border-slate-200/70 sm:border-none shadow-xs sm:shadow-none flex flex-col items-center text-center">
+                <div
+                  className={`lift-pop size-12 sm:size-14 md:size-[60px] rounded-xl sm:rounded-2xl md:rounded-[30px] flex items-center justify-center shadow-xs mb-3 sm:mb-[20px] lg:mb-[24px] shrink-0 ${shelf.iconBg}`}
+                >
+                  {shelf.icon}
+                </div>
+                <h3 className="font-display font-bold text-[16px] sm:text-[17px] md:text-[20px] text-[#0f172a] leading-tight tracking-[-0.3px] mb-1.5 sm:mb-[12px]">
+                  {shelf.title}
+                </h3>
+                <p className="font-display text-[14px] md:text-[15px] text-[#475569] leading-[1.6] max-w-[340px]">
+                  {shelf.description}
+                </p>
               </div>
-              <h3 className="font-display font-bold text-[16px] sm:text-[17px] md:text-[20px] text-[#0f172a] leading-tight tracking-[-0.3px] mb-1.5 sm:mb-[12px]">
-                {shelf.title}
-              </h3>
-              <p className="font-display text-[14px] sm:text-[14px] md:text-[15px] text-[#475569] leading-[1.6] max-w-[340px]">
-                {shelf.description}
-              </p>
-            </li>
+            </Reveal>
           ))}
         </ul>
 
+        {/* Risk wording is never animated */}
         <p className="mt-10 sm:mt-14 max-w-[860px] text-center font-sans text-[12.5px] sm:text-[13px] text-[#475569] leading-relaxed">
           Coupons on bonds and structured notes are indicative, set at issuance
           and not guaranteed. Capital is at risk, and structured products carry
