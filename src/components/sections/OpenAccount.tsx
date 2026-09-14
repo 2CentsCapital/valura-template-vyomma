@@ -255,13 +255,8 @@ export default function OpenAccount() {
             text="Ready to take your portfolio global?"
             tag="h2"
             className="font-display font-extrabold text-[28px] sm:text-[38px] md:text-[44px] lg:text-[48px] leading-[1.2] tracking-[-0.96px] mb-4 sm:mb-[20px]"
-            delay={30}
-            duration={0.8}
-            ease="power3.out"
-            splitType="words, chars"
+            splitType="chars"
             textAlign="left"
-            from={{ opacity: 0, y: 30 }}
-            to={{ opacity: 1, y: 0 }}
           />
 
           <p className="font-display text-[15px] sm:text-[17px] md:text-[18px] text-indigo-50 mb-6 sm:mb-[36px]">

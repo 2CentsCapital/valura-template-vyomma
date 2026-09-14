@@ -45,13 +45,8 @@ export default function HowItWorks() {
             text="Go global in three steps."
             tag="h2"
             className="font-display font-semibold text-[30px] sm:text-[40px] md:text-[46px] lg:text-[52px] text-[#141518] leading-[1.1] tracking-[-1px] mb-3 sm:mb-[20px]"
-            delay={35}
-            duration={0.8}
-            ease="power3.out"
-            splitType="words, chars"
+            splitType="chars"
             textAlign="center"
-            from={{ opacity: 0, y: 30 }}
-            to={{ opacity: 1, y: 0 }}
           />
           <p className="font-sans font-medium text-[15px] sm:text-[17px] md:text-[18px] text-[#5f6368] leading-[1.6] px-2 sm:px-0">
             KYC once. Fund in rupees. Invest in dollars. FX and global

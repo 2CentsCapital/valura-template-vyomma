@@ -1,8 +1,6 @@
 import { useEffect } from "react"
 import Lenis from "lenis"
 import "lenis/dist/lenis.css"
-import { gsap } from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
 
 import Navbar from "./components/layout/Navbar"
 import Hero from "./components/sections/Hero"
@@ -16,27 +14,24 @@ import FAQ from "./components/sections/FAQ"
 import Footer from "./components/sections/Footer"
 import { prefersReducedMotion } from "./hooks/usePrefersReducedMotion"
 
-gsap.registerPlugin(ScrollTrigger)
+const NATIVELY_FOCUSABLE =
+  "a[href], button, input, select, textarea, [tabindex]"
 
 export default function App() {
   useEffect(() => {
+    // Smooth-scroll hijacking is the one effect withheld from visitors who ask their OS for reduced motion:
+    // they keep native scrolling. All other motion runs for everyone and can be paused from the footer.
     const reduceMotion = prefersReducedMotion()
-    let lenis: Lenis | null = null
-    const tick = (time: number) => lenis?.raf(time * 1000)
+    const lenis = reduceMotion
+      ? null
+      : new Lenis({
+          duration: 1.2,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          smoothWheel: true,
+          autoRaf: true,
+        })
 
-    // Smooth scrolling is decoration: visitors who ask for reduced motion keep native scrolling.
-    if (!reduceMotion) {
-      lenis = new Lenis({
-        duration: 1.2,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smoothWheel: true,
-      })
-      lenis.on("scroll", ScrollTrigger.update)
-      gsap.ticker.add(tick)
-      gsap.ticker.lagSmoothing(0)
-    }
-
-    // In-page links scroll to their section, keep the URL in sync and move focus there, so keyboard and
+    // In-page links scroll to their target, keep the URL in sync and move focus there, so keyboard and
     // screen-reader users land where they asked. CSS scroll-margin keeps targets clear of the sticky header.
     const onClick = (event: MouseEvent) => {
       if (
@@ -62,12 +57,8 @@ export default function App() {
       event.preventDefault()
       requestAnimationFrame(() => {
         if (lenis) lenis.scrollTo(target)
-        else
-          target.scrollIntoView({
-            behavior: reduceMotion ? "auto" : "smooth",
-            block: "start",
-          })
-        if (!target.hasAttribute("tabindex"))
+        else target.scrollIntoView({ behavior: "auto", block: "start" })
+        if (!target.matches(NATIVELY_FOCUSABLE))
           target.setAttribute("tabindex", "-1")
         target.focus({ preventScroll: true })
         history.replaceState(null, "", hash)
@@ -77,7 +68,6 @@ export default function App() {
 
     return () => {
       document.removeEventListener("click", onClick)
-      gsap.ticker.remove(tick)
       lenis?.destroy()
     }
   }, [])
@@ -86,6 +76,9 @@ export default function App() {
     <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans antialiased selection:bg-brand-blue selection:text-white">
       <a href="#main" className="skip-link">
         Skip to content
+      </a>
+      <a href="#motion-toggle" className="skip-link">
+        Skip to animation controls
       </a>
 
       <Navbar />

@@ -36,13 +36,8 @@ export default function TrustRegulation() {
             text="Regulated at GIFT City. One consolidated view."
             tag="h2"
             className="font-display font-extrabold text-[28px] sm:text-[34px] md:text-[40px] text-[#0f172a] leading-[1.25] tracking-[-0.8px] mb-3 sm:mb-[20px]"
-            delay={40}
-            duration={0.8}
-            ease="power3.out"
-            splitType="words, chars"
+            splitType="chars"
             textAlign="center"
-            from={{ opacity: 0, y: 30 }}
-            to={{ opacity: 1, y: 0 }}
           />
           <p className="font-display font-medium text-[16px] sm:text-[19px] md:text-[21px] text-[#1e293b] leading-[1.6] mb-4 sm:mb-6">
             {legal.entity} is an IFSCA-regulated broker-dealer at GIFT City: a

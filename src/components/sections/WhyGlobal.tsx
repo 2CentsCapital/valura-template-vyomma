@@ -131,13 +131,8 @@ export default function WhyGlobal() {
               text="A portfolio with two engines."
               tag="h2"
               className="font-display font-semibold text-[32px] sm:text-[40px] md:text-[46px] lg:text-[52px] leading-[1.1] tracking-[-1px] text-[#141518] mb-4 sm:mb-6 lg:mb-8"
-              delay={35}
-              duration={0.8}
-              ease="power3.out"
-              splitType="words, chars"
+              splitType="chars"
               textAlign="left"
-              from={{ opacity: 0, y: 30 }}
-              to={{ opacity: 1, y: 0 }}
             />
 
             <p className="font-sans text-[15px] sm:text-[17px] lg:text-[18px] text-[#5f6368] leading-[1.6] mb-6 sm:mb-10 lg:mb-[44px] max-w-[480px]">

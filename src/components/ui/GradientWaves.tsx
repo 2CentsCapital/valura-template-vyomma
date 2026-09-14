@@ -2,6 +2,11 @@ import { useEffect, useRef } from "react"
 import { Renderer, Program, Mesh, Triangle } from "ogl"
 import "./GradientWaves.css"
 
+type LoopControls = {
+  start: () => void
+  stop: () => void
+}
+
 const hexToRgb = (hex: string) => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
   if (!result) return [1, 1, 1]
@@ -156,11 +161,14 @@ interface GradientWavesProps {
   className?: string
   /** Called once the first frame has been drawn. */
   onReady?: () => void
+  /** Stops the render loop and keeps the last frame on screen. */
+  paused?: boolean
 }
 
 /**
- * Ray-marched wave background (WebGL 2). Rendered at 1x resolution to keep the per-pixel ray march cheap,
- * paused while off screen or while the tab is hidden. Callers mount it lazily and skip it for reduced motion.
+ * Ray-marched wave background (WebGL 2). Rendered at 1x resolution to keep the per-pixel ray march cheap.
+ * The loop stops while the canvas is off screen, while the tab is hidden and while `paused` is set, and time
+ * resumes where it stopped, so the waves never jump.
  */
 const GradientWaves = ({
   horizonColor = "#5227FF",
@@ -185,11 +193,14 @@ const GradientWaves = ({
   grainIntensity = 0.05,
   className = "",
   onReady,
+  paused = false,
 }: GradientWavesProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const enableMouseRef = useRef(mouseInteraction)
   const onReadyRef = useRef(onReady)
   onReadyRef.current = onReady
+  const pausedRef = useRef(paused)
+  const loopRef = useRef<LoopControls | null>(null)
 
   useEffect(() => {
     const container = containerRef.current
@@ -288,10 +299,14 @@ const GradientWaves = ({
     let raf = 0
     let isVisible = true
     let isPageVisible = !document.hidden
-    const t0 = performance.now()
+    let elapsed = 0
+    let last = -1
 
     const loop = (t: number) => {
-      program.uniforms.iTime.value = (t - t0) * 0.001
+      // Time advances only while the loop runs (capped per frame), so a pause or a hidden tab never jumps.
+      if (last >= 0) elapsed += Math.min(0.1, (t - last) / 1000)
+      last = t
+      program.uniforms.iTime.value = elapsed
       const tx = enableMouseRef.current ? targetMouse[0] : 0.5
       const ty = enableMouseRef.current ? targetMouse[1] : 0.5
       currentMouse[0] += 0.05 * (tx - currentMouse[0])
@@ -303,8 +318,10 @@ const GradientWaves = ({
     }
 
     const tryStart = () => {
-      if (isVisible && isPageVisible && raf === 0)
+      if (isVisible && isPageVisible && !pausedRef.current && raf === 0) {
+        last = -1
         raf = requestAnimationFrame(loop)
+      }
     }
     const tryStop = () => {
       if (raf !== 0) {
@@ -330,9 +347,11 @@ const GradientWaves = ({
     }
     document.addEventListener("visibilitychange", onVisibility)
 
+    loopRef.current = { start: tryStart, stop: tryStop }
     tryStart()
 
     return () => {
+      loopRef.current = null
       tryStop()
       ro.disconnect()
       io.disconnect()
@@ -343,8 +362,14 @@ const GradientWaves = ({
       if (canvas.parentNode === container) container.removeChild(canvas)
       gl.getExtension("WEBGL_lose_context")?.loseContext()
     }
-    // The WebGL context is created once; prop changes are pushed into uniforms by the effect below.
+    // The WebGL context is created once; prop changes are pushed in by the effects below.
   }, [])
+
+  useEffect(() => {
+    pausedRef.current = paused
+    if (paused) loopRef.current?.stop()
+    else loopRef.current?.start()
+  }, [paused])
 
   useEffect(() => {
     const container = containerRef.current

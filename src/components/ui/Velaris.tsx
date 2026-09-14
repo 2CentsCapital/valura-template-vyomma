@@ -1,5 +1,10 @@
 import { useEffect, useRef } from "react"
 
+type LoopControls = {
+  play: () => void
+  pause: () => void
+}
+
 const vertexShaderGLSL = `
 attribute vec2 position;
 varying vec2 vUv;
@@ -98,11 +103,13 @@ interface VelarisProps {
   colors?: string[]
   speed?: number
   grain?: number
+  /** Stops the render loop and keeps the last frame on screen. */
+  paused?: boolean
 }
 
 /**
- * Animated noise gradient (WebGL 1). Renders at 1x resolution, only runs while on screen and while the tab
- * is visible, and releases its context on unmount. Callers mount it lazily and skip it for reduced motion.
+ * Animated noise gradient (WebGL 1). Renders at 1x resolution, runs only while on screen, while the tab is
+ * visible and while `paused` is not set, resumes where it stopped and releases its context on unmount.
  */
 export default function Velaris({
   height = "100%",
@@ -111,9 +118,12 @@ export default function Velaris({
   colors = DEFAULT_COLORS,
   speed = 3.5,
   grain = 0.15,
+  paused = false,
 }: VelarisProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const colorsKey = colors.join(",")
+  const pausedRef = useRef(paused)
+  const loopRef = useRef<LoopControls | null>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -186,21 +196,27 @@ export default function Velaris({
       gl.uniform2f(uResolution, canvas.width, canvas.height)
     }
 
-    const startedAt = performance.now()
+    // Time advances only while the loop runs (capped per frame), so pausing never makes the gradient jump.
+    let elapsed = 0
+    let last = -1
     const draw = () => {
-      gl.uniform1f(uTime, ((performance.now() - startedAt) / 1000) * speed)
+      gl.uniform1f(uTime, elapsed * speed)
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
     }
 
     let frame = 0
     let onScreen = false
-    const loop = () => {
+    const loop = (now: number) => {
+      if (last >= 0) elapsed += Math.min(0.1, (now - last) / 1000)
+      last = now
       draw()
       frame = requestAnimationFrame(loop)
     }
     const play = () => {
-      if (frame === 0 && onScreen && !document.hidden)
+      if (frame === 0 && onScreen && !document.hidden && !pausedRef.current) {
+        last = -1
         frame = requestAnimationFrame(loop)
+      }
     }
     const pause = () => {
       if (frame !== 0) {
@@ -230,8 +246,10 @@ export default function Velaris({
       else play()
     }
     document.addEventListener("visibilitychange", onVisibilityChange)
+    loopRef.current = { play, pause }
 
     return () => {
+      loopRef.current = null
       pause()
       resizeObserver.disconnect()
       visibilityObserver.disconnect()
@@ -239,6 +257,12 @@ export default function Velaris({
       gl.getExtension("WEBGL_lose_context")?.loseContext()
     }
   }, [bg, colorsKey, speed, grain])
+
+  useEffect(() => {
+    pausedRef.current = paused
+    if (paused) loopRef.current?.pause()
+    else loopRef.current?.play()
+  }, [paused])
 
   return (
     <canvas

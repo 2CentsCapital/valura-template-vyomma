@@ -68,13 +68,8 @@ export default function FAQ() {
             text="Questions, answered simply."
             tag="h2"
             className="font-display font-extrabold text-[28px] sm:text-[36px] md:text-[44px] text-slate-900 leading-[1.2] tracking-[-0.88px] mb-2 sm:mb-3 max-w-[490px]"
-            delay={35}
-            duration={0.8}
-            ease="power3.out"
-            splitType="words, chars"
+            splitType="chars"
             textAlign="left"
-            from={{ opacity: 0, y: 30 }}
-            to={{ opacity: 1, y: 0 }}
           />
           <p className="font-display text-[14px] sm:text-[16px] text-[#475569] leading-[1.6] mb-5 sm:mb-8 lg:mb-[32px] max-w-[420px]">
             Everything you need to know about investing globally with{" "}

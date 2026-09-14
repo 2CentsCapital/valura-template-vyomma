@@ -126,13 +126,8 @@ export default function WhatYouCanHold() {
             text={`One account. ${facts.markets} global markets.`}
             tag="h2"
             className="font-display font-extrabold text-[28px] sm:text-[34px] md:text-[44px] text-[#0f172a] leading-[1.25] tracking-[-0.88px] mb-2.5 sm:mb-[16px]"
-            delay={35}
-            duration={0.8}
-            ease="power3.out"
-            splitType="words, chars"
+            splitType="chars"
             textAlign="center"
-            from={{ opacity: 0, y: 30 }}
-            to={{ opacity: 1, y: 0 }}
           />
           <p className="font-display text-[15px] sm:text-[16px] md:text-[18px] text-[#475569] leading-[1.6] px-1 sm:px-0">
             Six shelves under one IFSCA-regulated account. No second login, no

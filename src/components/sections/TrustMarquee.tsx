@@ -1,7 +1,5 @@
-import { useState } from "react"
-import { Pause, Play } from "lucide-react"
+import Reveal from "../../motion/Reveal"
 import { diamondPaths } from "../brand/vyommaPaths"
-import usePrefersReducedMotion from "../../hooks/usePrefersReducedMotion"
 import { facts } from "../../content/facts"
 
 // Only verifiable Valura.Ai facts: no partner, exchange or regulator logos.
@@ -72,21 +70,20 @@ function FactList({ hidden = false }: { hidden?: boolean }) {
 }
 
 export default function TrustMarquee() {
-  const reduceMotion = usePrefersReducedMotion()
-  const [paused, setPaused] = useState(false)
-
   return (
     <section
       aria-labelledby="facts-title"
       className="relative z-20 -mt-14 sm:-mt-20 md:-mt-28 lg:-mt-36 w-full bg-white pt-8 sm:pt-10 md:pt-12 pb-12 sm:pb-16 overflow-hidden"
     >
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 mb-6 sm:mb-8 text-center">
-        <h2
+        <Reveal
+          as="h2"
           id="facts-title"
+          y={12}
           className="font-sans font-semibold text-base sm:text-lg md:text-[20px] text-[#475569] tracking-[-0.2px]"
         >
           One account, the world's markets
-        </h2>
+        </Reveal>
       </div>
 
       <div className="w-full max-w-[1920px] mx-auto flex flex-col lg:flex-row items-stretch bg-white">
@@ -97,46 +94,23 @@ export default function TrustMarquee() {
           </p>
         </div>
 
-        {reduceMotion ? (
-          <ul className="flex-1 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 px-4 py-4 sm:py-6">
-            {FACTS.map((fact) => (
-              <li key={fact.label}>
-                <FactItem figure={fact.figure} label={fact.label} />
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="relative flex-1 overflow-hidden py-3 sm:py-5 [mask-image:linear-gradient(to_right,transparent_0%,black_35px,black_calc(100%-35px),transparent_100%)]">
+        {/* The ticker moves for every visitor; hover, keyboard focus or the footer control pauses it */}
+        <div
+          role="group"
+          aria-label="Key facts. Hover or focus to pause the moving list."
+          tabIndex={0}
+          className="marquee-group relative flex-1 min-w-0 rounded-lg focus-visible:[outline-offset:-3px]"
+        >
+          <div className="relative overflow-hidden py-3 sm:py-5 [mask-image:linear-gradient(to_right,transparent_0%,black_35px,black_calc(100%-35px),transparent_100%)]">
             <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-white to-transparent z-10" />
             <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent z-10" />
-            <div
-              className="animate-marquee flex items-center"
-              data-paused={paused}
-            >
+            <div className="animate-marquee flex items-center">
               <FactList />
               <FactList hidden />
             </div>
           </div>
-        )}
-      </div>
-
-      {!reduceMotion && (
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 mt-3 flex justify-end">
-          <button
-            type="button"
-            onClick={() => setPaused((value) => !value)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 font-sans text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
-          >
-            {paused ? (
-              <Play size={14} aria-hidden="true" />
-            ) : (
-              <Pause size={14} aria-hidden="true" />
-            )}
-            {paused ? "Play" : "Pause"}
-            <span className="sr-only"> the moving list of facts</span>
-          </button>
         </div>
-      )}
+      </div>
     </section>
   )
 }
