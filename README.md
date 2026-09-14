@@ -8,7 +8,7 @@ broker-dealer at GIFT City.
 **Vyomma is a demonstration brand** for the Valura.Ai co-brand programme, not an existing firm. The page says
 nothing about Vyomma itself (no history, team, clients or figures) and is marked `noindex, nofollow`.
 
-Stack: React 19, TypeScript, Vite 8, Tailwind CSS 4, GSAP (SplitText, ScrollTrigger), Lenis and ogl.
+Stack: React 19, TypeScript, Vite 8, Tailwind CSS 4, GSAP (SplitText), Lenis and ogl.
 
 ## Page sections
 
@@ -23,7 +23,7 @@ Stack: React 19, TypeScript, Vite 8, Tailwind CSS 4, GSAP (SplitText, ScrollTrig
 | How it works | `src/components/sections/HowItWorks.tsx` | `#how` |
 | Lead form and app download | `src/components/sections/OpenAccount.tsx` | `#open-account` |
 | FAQ | `src/components/sections/FAQ.tsx` | `#faq` |
-| Footer, legal and risk text | `src/components/sections/Footer.tsx` | |
+| Footer, legal and risk text, animation control | `src/components/sections/Footer.tsx` | |
 
 Links, CTA targets, brand strings, the regulated entity and the lead-form settings live in
 `src/config/site.ts`. Headline figures live in `src/content/facts.ts`. Change them there, nowhere else.
@@ -49,11 +49,49 @@ Links, CTA targets, brand strings, the regulated entity and the lead-form settin
   risk." The page currently shows none.
 - Mock app screens and portfolio visuals carry the caption "Illustrative only. Not investment advice."
 - The footer keeps the risk line "Investments in securities markets are subject to market risks. Read all
-  related documents carefully before investing."
+  related documents carefully before investing." Legal, risk and disclaimer text is never animated.
 - The brand is written "Valura.Ai" and the relation is always "Vyomma powered by Valura.Ai". The Valura mark
   (`src/assets/brand/`) is used as supplied and never recoloured.
 - No private company names, fund manager names, partner registrations or exchange and regulator logos.
 - No em dashes or en dashes anywhere.
+
+## Motion
+
+Designed motion runs for every visitor, including visitors whose operating system reports
+`prefers-reduced-motion: reduce` (for example Windows with animation effects turned off).
+
+- **Reduced motion** withholds only the vestibular-risk effects: Lenis smooth scrolling is off (native
+  scrolling, instant in-page jumps) and the hero wave camera no longer follows the pointer. Ambient loops run
+  a little slower. The page has no scroll-scrubbed parallax, tilt or zoom.
+- **Pause animations**: one button in the footer (also reachable with the "Skip to animation controls" link)
+  stops the facts ticker, the floating app preview and glow, the FAQ illustration, both WebGL backgrounds and
+  all entrance animations. The choice is stored in `localStorage` under `vyomma:animations-paused`, applied
+  before first paint by a small script in `index.html`, and kept in step across tabs. The ticker also pauses
+  on hover and on keyboard focus.
+- **Performance guards**: the WebGL canvases render at 1x, stop while off screen, while the tab is hidden and
+  while paused, and resume without jumping. Motion animates transform and opacity only, except the FAQ answer
+  height. Reveals never move the layout, split text waits at most 350 ms for web fonts, and a shared in-view
+  watcher (IntersectionObserver plus scroll and one-second timer fallbacks) ensures content in view is never
+  left hidden.
+- **Timing**: UI transitions 200 to 700 ms, reveals under 900 ms, one easing family (quint out for entrances
+  and UI, a gentle sine in-out for ambient loops), and no hero copy held back by more than about 400 ms.
+
+| Section | Motion |
+| --- | --- |
+| Header | Underline slides to the section in view, shadow fades in on scroll, mobile menu links stagger in, CTA sheen |
+| Hero | Wave shader background, headline lines slide up from a mask, subtitle reveals word by word, CTAs and stats rise in, stats count up once, app preview rises then floats with a soft glow, primary CTA sheen and arrow nudge |
+| Facts ticker | Continuous ticker, paused by hover, keyboard focus or the footer control |
+| Why global | Heading letters, copy and checklist stagger, image eases in, portfolio card rises and floats, donut turns into place |
+| Trust and regulation | Heading letters, copy, registrations card and rows rise in with a short stagger |
+| What you can hold | Heading letters, six cards stagger in, cards lift with a shadow and the icon grows on hover |
+| How it works | Heading letters, three step cards stagger in, cards lift and the app screen eases closer on hover |
+| Open account | Heading letters, checklist stagger, form card rises in, submit sheen and arrow nudge, field errors fade in, success mark pops in |
+| FAQ | Heading letters, questions stagger in, answers animate their height and fade in, chevron turns, question marks bob |
+| Footer | Gradient shader background, columns and wordmark rise in, links grow an underline, Pause animations control |
+
+Motion code: `src/motion/` (pause store, in-view watcher, `Reveal`, `CountUp`), `src/components/ui/SplitText.tsx`,
+`src/components/ui/GradientWaves.tsx`, `src/components/ui/Velaris.tsx`, `src/components/common/MotionToggle.tsx`
+and the motion block in `src/index.css`.
 
 ## Configuration
 
@@ -119,9 +157,8 @@ caching. The repository is not linked to any Netlify site; set the variables abo
 - `public/`: favicons generated from the Vyomma mark and `og-image.jpg` (1200 x 630) composed from the logos and
   the edited dashboard.
 
-Heavy media is sized for display (WebP, at most 2x the rendered size), below-the-fold images load lazily, the
-wave and gradient shaders load after first paint or near the viewport, pause off screen and are skipped for
-visitors who prefer reduced motion (as are smooth scrolling, the text animations and the moving ticker).
+Heavy media is sized for display (WebP, at most 2x the rendered size), below-the-fold images load lazily, and
+the wave shader is a separate chunk mounted once the page is idle.
 
 ## Needs sign-off
 
@@ -146,3 +183,5 @@ visitors who prefer reduced motion (as are smooth scrolling, the text animations
 9. **App screens**: confirm the edited screens reflect the current Valura.Ai app.
 10. **Typography**: the design referenced Clash Grotesk for some headings, which the export never loaded;
     those headings use Plus Jakarta Sans.
+11. **Motion policy**: designed motion runs even when the OS asks for reduced motion, with a persistent Pause
+    animations control in the footer instead. Confirm this with an accessibility review.

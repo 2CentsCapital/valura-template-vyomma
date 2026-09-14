@@ -1,11 +1,12 @@
 /**
  * One shared "first time in view" watcher for reveals, split headings and count-ups.
  * IntersectionObserver does the work. A rAF-throttled scroll check and a one-second timer are fallbacks, so
- * content in view is never left hidden if the observer does not fire.
+ * content in view is never left hidden if an observer does not fire.
  */
 
 const pending = new Map<Element, () => void>()
-let observer: IntersectionObserver | null = null
+let enterObserver: IntersectionObserver | null = null
+let fullObserver: IntersectionObserver | null = null
 let timer = 0
 let frameQueued = false
 
@@ -16,15 +17,18 @@ function isInView(element: Element): boolean {
   const rect = element.getBoundingClientRect()
   if (rect.width === 0 && rect.height === 0) return false
   const viewport = window.innerHeight
-  // At the very bottom of the page nothing can scroll further up, so the whole viewport counts.
+  if (rect.bottom <= 0 || rect.top >= viewport) return false
+  // Past the enter line, wholly on screen (a small element low in the viewport), or at the very bottom of
+  // the page, where nothing can scroll further up.
   const atBottom =
     window.scrollY + viewport >= document.documentElement.scrollHeight - 2
-  return rect.bottom > 0 && rect.top < viewport * (atBottom ? 1 : ENTER_AT)
+  return rect.top < viewport * ENTER_AT || rect.bottom <= viewport || atBottom
 }
 
 function release(element: Element) {
   pending.delete(element)
-  observer?.unobserve(element)
+  enterObserver?.unobserve(element)
+  fullObserver?.unobserve(element)
   if (pending.size === 0) stopFallbacks()
 }
 
@@ -69,25 +73,32 @@ function stopFallbacks() {
   timer = 0
 }
 
-function getObserver(): IntersectionObserver | null {
-  if (observer || typeof IntersectionObserver === "undefined") return observer
-  observer = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) fire(entry.target)
-      }
-    },
-    { rootMargin: `0px 0px -${Math.round((1 - ENTER_AT) * 100)}% 0px` },
-  )
-  return observer
+function createObservers(): boolean {
+  if (enterObserver) return true
+  if (typeof IntersectionObserver === "undefined") return false
+  const onEntries = (entries: IntersectionObserverEntry[]) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) fire(entry.target)
+    }
+  }
+  // Fires as the element's top crosses the enter line
+  enterObserver = new IntersectionObserver(onEntries, {
+    rootMargin: `0px 0px -${Math.round((1 - ENTER_AT) * 100)}% 0px`,
+  })
+  // Fires when a small element is wholly visible below the enter line
+  fullObserver = new IntersectionObserver(onEntries, { threshold: 1 })
+  return true
 }
 
 /** Calls `callback` once, the first time `element` comes into view. Returns a function that cancels it. */
 export function onceInView(element: Element, callback: () => void): () => void {
   pending.set(element, callback)
-  const io = getObserver()
-  if (io) io.observe(element)
-  else queueCheck()
+  if (createObservers()) {
+    enterObserver?.observe(element)
+    fullObserver?.observe(element)
+  } else {
+    queueCheck()
+  }
   startFallbacks()
   return () => {
     if (pending.has(element)) release(element)
