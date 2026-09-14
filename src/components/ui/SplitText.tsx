@@ -1,187 +1,170 @@
-import { useRef, useEffect, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SplitText as GSAPSplitText } from 'gsap/SplitText';
-import { useGSAP } from '@gsap/react';
+import { useCallback, useLayoutEffect, useRef, type CSSProperties } from "react"
+import { gsap } from "gsap"
+import { SplitText as GSAPSplitText } from "gsap/SplitText"
+import useAnimationsPaused from "../../motion/animationsPaused"
+import { onceInView } from "../../motion/inView"
 
-gsap.registerPlugin(ScrollTrigger, GSAPSplitText, useGSAP);
+gsap.registerPlugin(GSAPSplitText)
 
 export interface SplitTextProps {
-  text: string;
-  className?: string;
-  delay?: number;
-  duration?: number;
-  ease?: string;
-  splitType?: string;
-  from?: Record<string, any>;
-  to?: Record<string, any>;
-  threshold?: number;
-  rootMargin?: string;
-  textAlign?: 'left' | 'center' | 'right' | 'justify' | 'start' | 'end';
-  tag?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div';
-  onLetterAnimationComplete?: () => void;
+  text: string
+  id?: string
+  className?: string
+  /** "lines" slide up from a mask; "words" and "chars" fade and rise */
+  splitType?: "lines" | "words" | "chars"
+  /** Seconds to wait once the text is in view */
+  delay?: number
+  /** Seconds each line, word or letter takes */
+  duration?: number
+  /** Total stagger across the whole text, in seconds */
+  stagger?: number
+  textAlign?: CSSProperties["textAlign"]
+  tag?: "h1" | "h2" | "h3" | "p" | "span" | "div"
 }
 
-const SplitText = ({
+/** The split waits for web fonts, but never longer than this, so hero copy is not held back. */
+const FONT_WAIT_MS = 350
+
+function whenFontsReady(): Promise<void> {
+  const fonts = document.fonts
+  if (!fonts || fonts.status === "loaded") return Promise.resolve()
+  return Promise.race([
+    fonts.ready.then(() => undefined),
+    new Promise<void>((resolve) => window.setTimeout(resolve, FONT_WAIT_MS)),
+  ])
+}
+
+/**
+ * Text that reveals line by line, word by word or letter by letter the first time it comes into view.
+ * Screen readers get a plain copy; the animated copy is aria-hidden. It runs for every visitor and stays
+ * still once they pause animations.
+ */
+export default function SplitText({
   text,
-  className = '',
-  delay = 50,
-  duration = 1.25,
-  ease = 'power3.out',
-  splitType = 'chars',
-  from = { opacity: 0, y: 40 },
-  to = { opacity: 1, y: 0 },
-  threshold = 0.1,
-  rootMargin = '-100px',
-  textAlign = 'center',
-  tag = 'p',
-  onLetterAnimationComplete
-}: SplitTextProps) => {
-  const ref = useRef<any>(null);
-  const animationCompletedRef = useRef(false);
-  const onCompleteRef = useRef(onLetterAnimationComplete);
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  id,
+  className = "",
+  splitType = "chars",
+  delay = 0,
+  duration = 0.6,
+  stagger = 0.25,
+  textAlign = "center",
+  tag = "p",
+}: SplitTextProps) {
+  const outerRef = useRef<HTMLElement | null>(null)
+  const visualRef = useRef<HTMLSpanElement>(null)
+  const doneRef = useRef(false)
+  const paused = useAnimationsPaused()
 
-  // Keep callback ref updated
-  useEffect(() => {
-    onCompleteRef.current = onLetterAnimationComplete;
-  }, [onLetterAnimationComplete]);
+  const setOuter = useCallback((node: HTMLElement | null) => {
+    outerRef.current = node
+  }, [])
 
-  useEffect(() => {
-    if (document.fonts?.status === 'loaded') {
-      setFontsLoaded(true);
-    } else if (document.fonts?.ready) {
-      document.fonts.ready.then(() => {
-        setFontsLoaded(true);
-      });
-    } else {
-      setFontsLoaded(true);
+  useLayoutEffect(() => {
+    const outer = outerRef.current
+    const visual = visualRef.current
+    if (!outer || !visual) return
+
+    if (paused || doneRef.current) {
+      outer.dataset.split = "ready"
+      // Text seen while animations are paused stays still after they resume.
+      return paused
+        ? onceInView(outer, () => {
+            doneRef.current = true
+          })
+        : undefined
     }
-  }, []);
 
-  useGSAP(
-    () => {
-      if (!ref.current || !text || !fontsLoaded) return;
-      // Prevent re-animation if already completed
-      if (animationCompletedRef.current) return;
-      const el = ref.current;
-
-      if ((el as any)._rbsplitInstance) {
-        try {
-          (el as any)._rbsplitInstance.revert();
-        } catch (_) {
-          /* noop */
-        }
-        (el as any)._rbsplitInstance = null;
-      }
-
-      const startPct = (1 - threshold) * 100;
-      const marginMatch = /^(-?\d+(?:\.\d+)?)(px|em|rem|%)?$/.exec(rootMargin);
-      const marginValue = marginMatch ? parseFloat(marginMatch[1]) : 0;
-      const marginUnit = marginMatch ? marginMatch[2] || 'px' : 'px';
-      const sign =
-        marginValue === 0
-          ? ''
-          : marginValue < 0
-            ? `-=${Math.abs(marginValue)}${marginUnit}`
-            : `+=${marginValue}${marginUnit}`;
-      const start = `top ${startPct}%${sign}`;
-
-      let targets: any;
-      const assignTargets = (self: any) => {
-        if (splitType.includes('chars') && self.chars?.length) targets = self.chars;
-        if (!targets && splitType.includes('words') && self.words?.length) targets = self.words;
-        if (!targets && splitType.includes('lines') && self.lines?.length) targets = self.lines;
-        if (!targets) targets = self.chars || self.words || self.lines;
-      };
-
-      const splitInstance = new (GSAPSplitText as any)(el, {
-        type: splitType,
-        smartWrap: true,
-        autoSplit: splitType === 'lines',
-        linesClass: 'split-line',
-        wordsClass: 'split-word',
-        charsClass: 'split-char',
-        reduceWhiteSpace: false,
-        onSplit: (self: any) => {
-          assignTargets(self);
-          const tween = gsap.fromTo(
-            targets,
-            { ...from },
-            {
-              ...to,
-              duration,
-              ease,
-              stagger: delay / 1000,
-              scrollTrigger: {
-                trigger: el,
-                start,
-                once: true,
-                fastScrollEnd: true,
-                anticipatePin: 0.4
-              },
-              onComplete: () => {
-                animationCompletedRef.current = true;
-                onCompleteRef.current?.();
-              },
-              willChange: 'transform, opacity',
-              force3D: true
-            }
-          );
-          return tween;
-        }
-      });
-
-      (el as any)._rbsplitInstance = splitInstance;
-
-      return () => {
-        ScrollTrigger.getAll().forEach(st => {
-          if (st.trigger === el) st.kill();
-        });
-        try {
-          splitInstance.revert();
-        } catch (_) {
-          /* noop */
-        }
-        (el as any)._rbsplitInstance = null;
-      };
-    },
-    {
-      dependencies: [
-        text,
-        delay,
-        duration,
-        ease,
-        splitType,
-        JSON.stringify(from),
-        JSON.stringify(to),
-        threshold,
-        rootMargin,
-        fontsLoaded
-      ],
-      scope: ref
+    outer.dataset.split = "pending"
+    let cancelled = false
+    let entered = false
+    let tween: gsap.core.Tween | undefined
+    const ctx = gsap.context(() => {})
+    const markReady = () => {
+      outer.dataset.split = "ready"
     }
-  );
+    // Never leave text hidden if splitting is slow or fails.
+    const safety = window.setTimeout(markReady, 1200)
+    const stopWatching = onceInView(outer, () => {
+      entered = true
+      tween?.play()
+    })
 
-  const renderTag = () => {
-    const style: React.CSSProperties = {
-      textAlign,
-      overflow: 'hidden',
-      display: 'inline-block',
-      whiteSpace: 'normal',
-      wordWrap: 'break-word',
-      willChange: 'transform, opacity'
-    };
-    const classes = `split-parent ${className}`.trim();
-    const Tag = (tag || 'p') as any;
+    whenFontsReady().then(() => {
+      if (cancelled) return
+      ctx.add(() => {
+        GSAPSplitText.create(visual, {
+          type: splitType === "chars" ? "words, chars" : splitType,
+          ...(splitType === "lines"
+            ? { mask: "lines" as const, autoSplit: true }
+            : {}),
+          tag: "span",
+          aria: "none",
+          linesClass: "split-line",
+          wordsClass: "split-word",
+          charsClass: "split-char",
+          reduceWhiteSpace: false,
+          onSplit(self: GSAPSplitText) {
+            const targets =
+              splitType === "lines"
+                ? self.lines
+                : splitType === "words"
+                  ? self.words
+                  : self.chars
+            const each =
+              targets.length > 1
+                ? Math.min(0.06, stagger / (targets.length - 1))
+                : 0
+            tween = gsap.fromTo(
+              targets,
+              splitType === "lines"
+                ? { yPercent: 110 }
+                : { opacity: 0, y: splitType === "words" ? 14 : 24 },
+              {
+                ...(splitType === "lines"
+                  ? { yPercent: 0 }
+                  : { opacity: 1, y: 0 }),
+                duration,
+                delay,
+                stagger: each,
+                ease: "power4.out",
+                force3D: true,
+                paused: !entered,
+                onComplete: () => {
+                  doneRef.current = true
+                },
+              },
+            )
+            markReady()
+            // Returning the tween lets a re-split (font swap, resize) continue from the same point.
+            return tween
+          },
+        })
+      })
+    })
 
-    return (
-      <Tag ref={ref} style={style} className={classes}>
+    return () => {
+      cancelled = true
+      window.clearTimeout(safety)
+      stopWatching()
+      tween?.kill()
+      ctx.revert()
+    }
+  }, [paused, text, splitType, delay, duration, stagger])
+
+  const Tag = tag
+
+  return (
+    <Tag
+      ref={setOuter}
+      id={id}
+      data-split={paused ? "ready" : "pending"}
+      className={`split-parent ${className}`.trim()}
+      style={{ textAlign, display: "inline-block", overflowWrap: "break-word" }}
+    >
+      <span ref={visualRef} className="split-visual block" aria-hidden="true">
         {text}
-      </Tag>
-    );
-  };
-  return renderTag();
-};
-
-export default SplitText;
+      </span>
+      <span className="sr-only">{text}</span>
+    </Tag>
+  )
+}

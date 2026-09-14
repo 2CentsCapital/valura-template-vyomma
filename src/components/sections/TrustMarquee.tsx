@@ -1,255 +1,238 @@
-import svgPaths from "../../imports/VyommaAutomatedTaskSchedulingWealthWorkflow/svg-199um8fzce";
-import imgImageBse from "../../imports/VyommaAutomatedTaskSchedulingWealthWorkflow/6a6c7107951e5e7d937d58801f7ac224ee8c66f7.png";
-import imgImageIfsca from "../../imports/VyommaAutomatedTaskSchedulingWealthWorkflow/bf58fade2d0f655487506695245c57d0b250b66f.png";
-import imgImageAsiaAssetManagement from "../../imports/VyommaAutomatedTaskSchedulingWealthWorkflow/bee919398bdc0d194730a6808d7ab74364dea33d.png";
+import { useLayoutEffect, useRef } from "react"
+import Reveal from "../../motion/Reveal"
+import useAnimationsPaused from "../../motion/animationsPaused"
+import { diamondPaths } from "../brand/vyommaPaths"
+import { facts } from "../../content/facts"
 
-// Diamond star separator icon
-function DiamondSeparator() {
+// Only verifiable Valura.Ai facts: no partner, exchange or regulator logos.
+const FACTS = [
+  { figure: facts.markets, label: "Global markets, one account" },
+  { figure: facts.instruments, label: "Stocks, funds and bonds to own" },
+  { figure: facts.usStocksAndEtfs, label: "US stocks and ETFs" },
+  { figure: `From ${facts.fractionalFrom}`, label: "Fractional investing" },
+  { figure: facts.lrsLimit, label: "Each financial year under LRS" },
+  { figure: "IFSCA", label: "Regulated at GIFT City" },
+  { figure: "₹", label: "Funded in rupees under LRS" },
+]
+
+/** Widest the paused list may grow (matches .facts-static in index.css) */
+const STATIC_MAX_WIDTH = 1080
+
+function Diamond() {
   return (
-    <div className="h-[100px] px-6 sm:px-8 shrink-0 flex items-center justify-center">
-      <svg className="size-[14px] block" fill="none" viewBox="0 0 18 18">
-        <g opacity="0.3">
-          <path d={svgPaths.p3e7ed300} fill="#0B2240" />
-          <path d={svgPaths.p3358a380} fill="#0B2240" />
-          <path d={svgPaths.p39e24100} fill="#0B2240" />
-          <path d={svgPaths.p1a5bfa80} fill="#0B2240" />
-        </g>
-      </svg>
-    </div>
-  );
+    <svg
+      className="size-[14px] block"
+      fill="none"
+      viewBox="0 0 18 18"
+      focusable="false"
+    >
+      <g opacity="0.3">
+        {diamondPaths.map((d, index) => (
+          <path key={index} d={d} fill="#0B2240" />
+        ))}
+      </g>
+    </svg>
+  )
 }
 
-// All items in the marquee
-function PartnerItems() {
+function DiamondSeparator() {
   return (
-    <>
-      {/* 1. CDSL Depository */}
-      <div className="flex flex-col items-center justify-between h-[100px] min-w-[130px] shrink-0 py-1 select-none">
-        <div className="h-[60px] flex items-center justify-center">
-          <svg className="h-[52px] w-auto block" fill="none" viewBox="0 0 71.0003 96.0002">
-            <g id="cdsl-logo">
-              <path d={svgPaths.p3e175a00} fill="#12599E" />
-              <path d={svgPaths.p1c67d900} fill="#12599E" />
-              <path d={svgPaths.p29c7ffc0} fill="#12599E" />
-              <path d={svgPaths.p17b8cf00} fill="#12599E" />
-              <path d={svgPaths.p1db471c0} fill="#12599E" />
-              <path d={svgPaths.p2ed87100} fill="#12599E" />
-              <path d={svgPaths.p14400000} fill="#12599E" />
-              <path d={svgPaths.p1569cf00} fill="#A9A8AA" />
-              <path d={svgPaths.p315f1a00} fill="#12599E" />
-              <path d={svgPaths.p1f239e00} fill="#A9A8AA" />
-              <path d={svgPaths.p2e3f7680} fill="#A9A8AA" />
-              <path d={svgPaths.p2ddaf480} fill="#A9A8AA" />
-              <path d={svgPaths.p28ea1300} fill="#A9A8AA" />
-            </g>
-          </svg>
-        </div>
-        <p className="font-['Inter',sans-serif] font-bold text-[13px] text-[#0b2240] tracking-[-0.13px] whitespace-nowrap">
-          CDSL Depository
-        </p>
-      </div>
+    <span
+      className="h-[100px] px-6 sm:px-8 shrink-0 flex items-center justify-center"
+      aria-hidden="true"
+    >
+      <Diamond />
+    </span>
+  )
+}
 
-      <DiamondSeparator />
+interface FactItemProps {
+  figure: string
+  label: string
+}
 
-      {/* 2. 418+ Authorised Persons */}
-      <div className="flex flex-col items-center justify-between h-[100px] min-w-[130px] shrink-0 py-1 select-none">
-        <div className="h-[60px] flex items-center justify-center">
-          <span className="font-['Inter',sans-serif] font-extrabold text-[48px] sm:text-[54px] text-[#0b2240] tracking-[-1.5px] leading-none">
-            418+
-          </span>
-        </div>
-        <p className="font-['Inter',sans-serif] font-bold text-[13px] text-[#0b2240] tracking-[-0.13px] whitespace-nowrap">
-          Authorised Persons
-        </p>
-      </div>
+function FactItem({ figure, label }: FactItemProps) {
+  return (
+    <span className="flex flex-col items-center justify-between h-[100px] min-w-[130px] shrink-0 py-1 select-none">
+      <span className="h-[60px] flex items-center justify-center font-sans font-extrabold text-[40px] sm:text-[48px] text-[#0b2240] tracking-[-1.5px] leading-none whitespace-nowrap">
+        {figure}
+      </span>
+      <span className="font-sans font-bold text-[13px] text-[#0b2240] tracking-[-0.13px] whitespace-nowrap">
+        {label}
+      </span>
+    </span>
+  )
+}
 
-      <DiamondSeparator />
+function FactList({ hidden = false }: { hidden?: boolean }) {
+  return (
+    <ul
+      className="flex items-center shrink-0"
+      aria-hidden={hidden || undefined}
+    >
+      {FACTS.map((fact) => (
+        <li key={fact.label} className="flex items-center">
+          <FactItem figure={fact.figure} label={fact.label} />
+          <DiamondSeparator />
+        </li>
+      ))}
+    </ul>
+  )
+}
 
-      {/* 3. PAN-India presence */}
-      <div className="flex flex-col items-center justify-between h-[100px] min-w-[130px] shrink-0 py-1 select-none">
-        <div className="h-[60px] flex items-center justify-center">
-          <span className="text-[44px] leading-none drop-shadow-xs" role="img" aria-label="India">
-            🇮🇳
-          </span>
-        </div>
-        <p className="font-['Inter',sans-serif] font-bold text-[13px] text-[#0b2240] tracking-[-0.13px] whitespace-nowrap">
-          PAN-India presence
-        </p>
-      </div>
+/** Rows as flex-wrap lays them out: greedy, each row as full as the width allows. */
+function packRows(widths: number[], gap: number, limit: number): number[][] {
+  const rows: number[][] = []
+  let used = 0
+  widths.forEach((width, index) => {
+    const row = rows[rows.length - 1]
+    if (row && used + gap + width <= limit + 0.5) {
+      row.push(index)
+      used += gap + width
+    } else {
+      rows.push([index])
+      used = width
+    }
+  })
+  return rows
+}
 
-      <DiamondSeparator />
+/**
+ * With animations paused the facts are listed once, in centred rows balanced to avoid a lone last item,
+ * with no edge mask. A separator sits only between two facts on the same row.
+ */
+function StaticFacts() {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
 
-      {/* 4. Asia Asset Mgmt. */}
-      <div className="flex flex-col items-center justify-between h-[100px] min-w-[130px] shrink-0 py-1 select-none">
-        <div className="h-[60px] flex items-center justify-center">
-          <img
-            src={imgImageAsiaAssetManagement}
-            alt="Asia Asset Management"
-            className="h-[52px] w-auto object-contain"
-          />
-        </div>
-        <p className="font-['Inter',sans-serif] font-bold text-[13px] text-[#0b2240] tracking-[-0.13px] whitespace-nowrap">
-          Asia Asset Mgmt.
-        </p>
-      </div>
+  useLayoutEffect(() => {
+    const wrapper = wrapperRef.current
+    const list = listRef.current
+    if (!wrapper || !list) return
 
-      <DiamondSeparator />
+    const layout = () => {
+      const items = Array.from(list.children) as HTMLElement[]
+      if (!items.length) return
+      const wrapperStyle = getComputedStyle(wrapper)
+      const available =
+        wrapper.clientWidth -
+        parseFloat(wrapperStyle.paddingLeft) -
+        parseFloat(wrapperStyle.paddingRight)
+      const gap = parseFloat(getComputedStyle(list).columnGap) || 0
+      const widths = items.map((item) => item.getBoundingClientRect().width)
+      const limit = Math.min(available, STATIC_MAX_WIDTH)
 
-      {/* 5. Morningstar 5★ History */}
-      <div className="flex flex-col items-center justify-between h-[100px] min-w-[140px] shrink-0 py-1 select-none">
-        <div className="h-[60px] flex items-center justify-center">
-          <svg className="h-[38px] w-auto block" fill="none" viewBox="0 0 180.001 72.0002">
-            <g id="morningstar-logo">
-              <path d={svgPaths.pc134b00} fill="#FF0000" />
-              <path d={svgPaths.p1fe085f0} fill="#FF0000" />
-              <path d={svgPaths.p257ec580} fill="#FF0000" />
-              <path d={svgPaths.p34185f70} fill="#FF0000" />
-              <path d={svgPaths.pe9dd00} fill="#FF0000" />
-              <path d={svgPaths.p2c9fc280} fill="#FF0000" />
-              <path d={svgPaths.p180e900} fill="#FF0000" />
-              <path d={svgPaths.p1afbec00} fill="#FF0000" />
-              <path d={svgPaths.p8b55700} fill="#FF0000" />
-              <path d={svgPaths.p18177a40} fill="#FF0000" />
-            </g>
-          </svg>
-        </div>
-        <p className="font-['Inter',sans-serif] font-bold text-[13px] text-[#0b2240] tracking-[-0.13px] whitespace-nowrap">
-          Morningstar 5★ History
-        </p>
-      </div>
+      // Balance the rows: the narrowest list width that still needs no extra row.
+      const rowCount = packRows(widths, gap, limit).length
+      let low = Math.max(...widths)
+      let high = limit
+      for (let step = 0; step < 18; step++) {
+        const middle = (low + high) / 2
+        if (packRows(widths, gap, middle).length > rowCount) low = middle
+        else high = middle
+      }
+      list.style.maxWidth = `${Math.ceil(high) + 1}px`
 
-      <DiamondSeparator />
+      // Mark the first fact of each row, whose separator is hidden.
+      let previousCenter = Number.NEGATIVE_INFINITY
+      for (const item of items) {
+        const center = item.offsetTop + item.offsetHeight / 2
+        item.dataset.rowStart = center > previousCenter + 4 ? "true" : "false"
+        previousCenter = center
+      }
+    }
 
-      {/* 6. NSE Member */}
-      <div className="flex flex-col items-center justify-between h-[100px] min-w-[130px] shrink-0 py-1 select-none">
-        <div className="h-[60px] flex items-center justify-center">
-          <svg className="h-[46px] w-auto block" fill="none" viewBox="0 0 180 72">
-            <g id="nse-logo">
-              <path d={svgPaths.p18536380} fill="#EFB202" />
-              <path d={svgPaths.p3cd00d80} fill="#F43500" />
-              <path d={svgPaths.p366cc200} fill="#F43500" />
-              <path d={svgPaths.p3981380} fill="#0600CF" />
-              <path d={svgPaths.p29ca3100} fill="white" />
-              <path d={svgPaths.p22759b00} fill="#0600CF" />
-              <path d={svgPaths.p316bd500} fill="#0600CF" />
-              <path d={svgPaths.p7d08b00} fill="#0600CF" />
-              <path d={svgPaths.peeab300} fill="#F43500" />
-            </g>
-          </svg>
-        </div>
-        <p className="font-['Inter',sans-serif] font-bold text-[13px] text-[#0b2240] tracking-[-0.13px] whitespace-nowrap">
-          NSE Member
-        </p>
-      </div>
+    layout()
+    const observer = new ResizeObserver(layout)
+    observer.observe(wrapper)
+    let active = true
+    document.fonts?.ready.then(() => {
+      if (active) layout()
+    })
+    return () => {
+      active = false
+      observer.disconnect()
+    }
+  }, [])
 
-      <DiamondSeparator />
-
-      {/* 7. BSE Member */}
-      <div className="flex flex-col items-center justify-between h-[100px] min-w-[130px] shrink-0 py-1 select-none">
-        <div className="h-[60px] flex items-center justify-center">
-          <img
-            src={imgImageBse}
-            alt="BSE Member"
-            className="h-[52px] w-auto object-contain"
-          />
-        </div>
-        <p className="font-['Inter',sans-serif] font-bold text-[13px] text-[#0b2240] tracking-[-0.13px] whitespace-nowrap">
-          BSE Member
-        </p>
-      </div>
-
-      <DiamondSeparator />
-
-      {/* 8. SEBI Registered */}
-      <div className="flex flex-col items-center justify-between h-[100px] min-w-[130px] shrink-0 py-1 select-none">
-        <div className="h-[60px] flex items-center justify-center">
-          <svg className="h-[48px] w-auto block" fill="none" viewBox="0 0 101 96.0005">
-            <g id="sebi-logo">
-              <path clipRule="evenodd" d={svgPaths.p3ec30600} fill="#2E3192" fillRule="evenodd" />
-              <path clipRule="evenodd" d={svgPaths.p3e888600} fill="#2E3192" fillRule="evenodd" />
-              <path clipRule="evenodd" d={svgPaths.p28ef1180} fill="#2E3192" fillRule="evenodd" />
-            </g>
-          </svg>
-        </div>
-        <p className="font-['Inter',sans-serif] font-bold text-[13px] text-[#0b2240] tracking-[-0.13px] whitespace-nowrap">
-          SEBI Registered
-        </p>
-      </div>
-
-      <DiamondSeparator />
-
-      {/* 9. AMFI Registered */}
-      <div className="flex flex-col items-center justify-between h-[100px] min-w-[130px] shrink-0 py-1 select-none">
-        <div className="h-[60px] flex items-center justify-center">
-          <svg className="h-[48px] w-auto block" fill="none" viewBox="0 0 79.0004 96.0005">
-            <g id="amfi-logo">
-              <path d={svgPaths.p23f25e00} fill="#01A685" />
-              <path d={svgPaths.p2f105000} fill="#01A685" />
-              <path d={svgPaths.p202e2f80} fill="#01A685" />
-              <path d={svgPaths.p51f8300} fill="#01A685" />
-              <path d={svgPaths.p3b2cf800} fill="#01A685" />
-            </g>
-          </svg>
-        </div>
-        <p className="font-['Inter',sans-serif] font-bold text-[13px] text-[#0b2240] tracking-[-0.13px] whitespace-nowrap">
-          AMFI Registered
-        </p>
-      </div>
-
-      <DiamondSeparator />
-
-      {/* 10. IFSCA · GIFT IFSC */}
-      <div className="flex flex-col items-center justify-between h-[100px] min-w-[130px] shrink-0 py-1 select-none">
-        <div className="h-[60px] flex items-center justify-center">
-          <img
-            src={imgImageIfsca}
-            alt="IFSCA GIFT IFSC"
-            className="h-[52px] w-auto object-contain"
-          />
-        </div>
-        <p className="font-['Inter',sans-serif] font-bold text-[13px] text-[#0b2240] tracking-[-0.13px] whitespace-nowrap">
-          IFSCA · GIFT IFSC
-        </p>
-      </div>
-
-      <DiamondSeparator />
-    </>
-  );
+  return (
+    <div ref={wrapperRef} className="flex-1 min-w-0 px-4 sm:px-8 py-6 sm:py-8">
+      <ul ref={listRef} className="facts-static">
+        {FACTS.map((fact, index) => (
+          <li
+            key={fact.label}
+            className="facts-static-item"
+            data-row-start={index === 0 ? "true" : undefined}
+          >
+            {index > 0 && (
+              <span className="facts-static-sep" aria-hidden="true">
+                <Diamond />
+              </span>
+            )}
+            <span className="flex w-[148px] sm:w-auto sm:min-w-[150px] flex-col items-center gap-2 text-center select-none">
+              <span className="font-sans font-extrabold text-[30px] sm:text-[40px] lg:text-[44px] text-[#0b2240] tracking-[-1.2px] leading-none whitespace-nowrap">
+                {fact.figure}
+              </span>
+              <span className="font-sans font-bold text-[12px] sm:text-[13px] text-[#0b2240] tracking-[-0.13px] leading-snug sm:whitespace-nowrap">
+                {fact.label}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
 }
 
 export default function TrustMarquee() {
+  const paused = useAnimationsPaused()
+
   return (
-    <section className="relative z-20 -mt-14 sm:-mt-20 md:-mt-28 lg:-mt-36 w-full bg-white pt-8 sm:pt-10 md:pt-12 pb-14 sm:pb-20 overflow-hidden">
-      {/* Title */}
+    <section
+      aria-labelledby="facts-title"
+      className="relative z-20 -mt-14 sm:-mt-20 md:-mt-28 lg:-mt-36 w-full bg-white pt-8 sm:pt-10 md:pt-12 pb-12 sm:pb-16 overflow-hidden"
+    >
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 mb-6 sm:mb-8 text-center">
-        <h2 className="font-['Inter',sans-serif] font-semibold text-base sm:text-lg md:text-[20px] text-[#586b85] tracking-[-0.2px]">
-          Trusted By Investors Across India
-        </h2>
+        <Reveal
+          as="h2"
+          id="facts-title"
+          y={12}
+          className="font-sans font-semibold text-base sm:text-lg md:text-[20px] text-[#475569] tracking-[-0.2px]"
+        >
+          One account, the world's markets
+        </Reveal>
       </div>
 
-      {/* Marquee Row Container */}
       <div className="w-full max-w-[1920px] mx-auto flex flex-col lg:flex-row items-stretch bg-white">
-        {/* Fixed Left Badge */}
-        <div className="lg:w-[270px] xl:w-[290px] shrink-0 bg-white flex items-center justify-center lg:justify-start px-6 sm:px-10 py-6 lg:py-0 border-b lg:border-b-0 lg:border-r border-[#e4e0d4] z-20 shadow-[8px_0_16px_-6px_rgba(255,255,255,0.9)] select-none">
-          <div className="font-['Inter',sans-serif] font-bold text-lg sm:text-[20px] text-[#0d1117] leading-[1.3] text-center lg:text-left">
-            <p className="mb-0.5">A 30-year lineage,</p>
-            <p>twin-regulated</p>
-          </div>
+        <div className="lg:w-[270px] xl:w-[290px] shrink-0 bg-white flex items-center justify-center lg:justify-start px-6 sm:px-10 py-6 lg:py-0 border-b lg:border-b-0 lg:border-r border-[#e4e0d4] z-20 select-none">
+          <p className="font-sans font-bold text-lg sm:text-[20px] text-[#0d1117] leading-[1.3] text-center lg:text-left">
+            IFSCA-regulated, <br className="hidden lg:block" />
+            funded in rupees
+          </p>
         </div>
 
-        {/* Scrolling Marquee Container with Gradient Fade */}
-        <div className="relative flex-1 overflow-hidden py-3 sm:py-5 [mask-image:linear-gradient(to_right,transparent_0%,black_35px,black_calc(100%-35px),transparent_100%)]">
-          {/* Edge fade overlays for browser fallbacks */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-white to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent z-10" />
-
-          {/* Continuous Infinite Track (Two duplicate sets for seamless loop) */}
-          <div className="animate-marquee flex items-center">
-            <PartnerItems />
-            <PartnerItems />
+        {/* Moving for every visitor; hover, keyboard focus or the footer control pauses it. Paused, the
+            facts are listed once instead of freezing the strip mid-scroll. */}
+        {paused ? (
+          <StaticFacts />
+        ) : (
+          <div
+            role="group"
+            aria-label="Key facts. Hover or focus to pause the moving list."
+            tabIndex={0}
+            className="marquee-group relative flex-1 min-w-0 rounded-lg focus-visible:[outline-offset:-3px]"
+          >
+            <div className="relative overflow-hidden py-3 sm:py-5 [mask-image:linear-gradient(to_right,transparent_0%,black_35px,black_calc(100%-35px),transparent_100%)]">
+              <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-white to-transparent z-10" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent z-10" />
+              <div className="animate-marquee flex items-center">
+                <FactList />
+                <FactList hidden />
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
-  );
+  )
 }

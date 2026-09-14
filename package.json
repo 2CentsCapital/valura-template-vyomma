@@ -1,16 +1,21 @@
 {
-  "name": "figma-make-app",
+  "name": "vyomma-valura-landing",
   "private": true,
   "version": "1.0.0",
+  "description": "Vyomma powered by Valura.Ai: co-branded global investing landing page",
   "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "format": "oxfmt"
+    "typecheck": "tsc --noEmit",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
   },
   "dependencies": {
-    "@gsap/react": "^2.1.2",
     "gsap": "^3.15.0",
     "lenis": "^1.3.26",
     "lucide-react": "^1.40.0",
@@ -24,7 +29,6 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",
-    "netlify-cli": "^27.4.3",
     "oxfmt": "^0.2.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0",
