@@ -1,86 +1,81 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-@font-face {
-  font-family: "Open Sans:Light";
-  font-style: normal;
-  font-weight: 300;
-  src: url("https://static.figma.com/font/OpenSans_wdth_wght__2") format("woff2");
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  /* Vyomma palette, taken from the ribbon mark (violet, blue, sky) and the wordmark (ink) */
+  --color-brand-ink: #06064f;
+  --color-brand-blue: #3e68f6;
+  --color-brand-blue-deep: #2d4fd8;
+  --color-brand-violet: #6f41ee;
+  --color-brand-sky: #42b8f7;
+
+  /* Colour of the "Valura.Ai" name set next to the green Valura mark */
+  --color-valura-green: #0f7a39;
 }
 
-@font-face {
-  font-family: "Inter:Regular";
-  font-style: normal;
-  font-weight: 400;
-  src: url("https://static.figma.com/font/Inter_1") format("woff2");
+/* Keep in-page targets clear of the sticky header (read by native anchors and by Lenis) */
+section[id],
+main[id] {
+  scroll-margin-top: 92px;
 }
 
-@font-face {
-  font-family: "Plus Jakarta Sans:SemiBold";
-  font-style: normal;
+/* Form fields focused after a failed submit also stay clear of the sticky header */
+input,
+select,
+textarea {
+  scroll-margin-top: 120px;
+}
+
+/* Sections receive programmatic focus after in-page navigation: no ring around a whole section */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-brand-blue);
+  outline-offset: 3px;
+}
+
+.on-dark :focus-visible {
+  outline-color: #ffffff;
+}
+
+.on-light :focus-visible {
+  outline-color: var(--color-brand-blue);
+}
+
+.skip-link {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--color-brand-ink);
+  color: #ffffff;
   font-weight: 600;
-  src: url("https://static.figma.com/font/PlusJakartaSans_wght__2") format("woff2");
+  transform: translateY(-200%);
 }
 
-@font-face {
-  font-family: "Inter:Bold";
-  font-style: normal;
-  font-weight: 700;
-  src: url("https://static.figma.com/font/Inter_1") format("woff2");
+.skip-link:focus {
+  transform: translateY(0);
 }
 
-@font-face {
-  font-family: "Plus Jakarta Sans:ExtraBold";
-  font-style: normal;
-  font-weight: 800;
-  src: url("https://static.figma.com/font/PlusJakartaSans_wght__2") format("woff2");
+/* Soft brand backdrops, shown before, behind or instead of the shader effects */
+.hero-backdrop {
+  background:
+    radial-gradient(90% 55% at 50% 100%, rgb(59 130 246 / 0.28) 0%, rgb(59 130 246 / 0) 70%),
+    radial-gradient(55% 45% at 12% 88%, rgb(111 65 238 / 0.14) 0%, rgb(111 65 238 / 0) 70%),
+    linear-gradient(180deg, #ffffff 0%, #f2f6ff 100%);
 }
 
-@font-face {
-  font-family: "Plus Jakarta Sans:Regular";
-  font-style: normal;
-  font-weight: 400;
-  src: url("https://static.figma.com/font/PlusJakartaSans_wght__2") format("woff2");
-}
-
-@font-face {
-  font-family: "Plus Jakarta Sans:Bold";
-  font-style: normal;
-  font-weight: 700;
-  src: url("https://static.figma.com/font/PlusJakartaSans_wght__2") format("woff2");
-}
-
-@font-face {
-  font-family: "Inter:Semi Bold";
-  font-style: normal;
-  font-weight: 600;
-  src: url("https://static.figma.com/font/Inter_1") format("woff2");
-}
-
-@font-face {
-  font-family: "Inter:Extra Bold";
-  font-style: normal;
-  font-weight: 800;
-  src: url("https://static.figma.com/font/Inter_1") format("woff2");
-}
-
-@font-face {
-  font-family: "Plus Jakarta Sans:Medium";
-  font-style: normal;
-  font-weight: 500;
-  src: url("https://static.figma.com/font/PlusJakartaSans_wght__2") format("woff2");
-}
-
-@font-face {
-  font-family: "Inter:Medium";
-  font-style: normal;
-  font-weight: 500;
-  src: url("https://static.figma.com/font/Inter_1") format("woff2");
-}
-
-html,
-body,
-#root {
-  height: 100%;
+.footer-backdrop {
+  background:
+    radial-gradient(60% 70% at 18% 28%, rgb(37 99 235 / 0.32) 0%, rgb(37 99 235 / 0) 70%),
+    radial-gradient(50% 60% at 82% 18%, rgb(124 58 237 / 0.28) 0%, rgb(124 58 237 / 0) 70%),
+    #050914;
 }
 
 @keyframes marquee {
@@ -99,7 +94,33 @@ body,
   will-change: transform;
 }
 
-.animate-marquee:hover {
+.animate-marquee:hover,
+.animate-marquee[data-paused="true"] {
   animation-play-state: paused;
 }
 
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu-in {
+  animation: menu-in 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

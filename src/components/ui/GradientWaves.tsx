@@ -1,25 +1,29 @@
-import { useEffect, useRef } from 'react';
-import { Renderer, Program, Mesh, Triangle } from 'ogl';
-import './GradientWaves.css';
+import { useEffect, useRef } from "react"
+import { Renderer, Program, Mesh, Triangle } from "ogl"
+import "./GradientWaves.css"
 
 const hexToRgb = (hex: string) => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!result) return [1, 1, 1];
-  return [parseInt(result[1], 16) / 255, parseInt(result[2], 16) / 255, parseInt(result[3], 16) / 255];
-};
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  if (!result) return [1, 1, 1]
+  return [
+    parseInt(result[1], 16) / 255,
+    parseInt(result[2], 16) / 255,
+    parseInt(result[3], 16) / 255,
+  ]
+}
 
 const detailToSteps = (detail: string) => {
-  if (detail === 'low') return 40.0;
-  if (detail === 'high') return 110.0;
-  return 70.0;
-};
+  if (detail === "low") return 40.0
+  if (detail === "high") return 110.0
+  return 70.0
+}
 
 const vertex = `#version 300 es
 in vec2 position;
 void main() {
   gl_Position = vec4(position, 0.0, 1.0);
 }
-`;
+`
 
 const fragment = `#version 300 es
 precision highp float;
@@ -124,38 +128,44 @@ void main() {
   alpha = clamp(alpha, 0.0, 1.0);
   fragColor = vec4(col * alpha, alpha);
 }
-`;
+`
 
-const ctxMap = new WeakMap();
+const ctxMap = new WeakMap()
 
 interface GradientWavesProps {
-  horizonColor?: string;
-  waveColor?: string;
-  crestColor?: string;
-  speed?: number;
-  amplitude?: number;
-  waveScale?: number;
-  waveRatio?: number;
-  swell?: number;
-  turbulence?: number;
-  tilt?: number;
-  zoom?: number;
-  height?: number;
-  fogDepth?: number;
-  detail?: string;
-  brightness?: number;
-  opacity?: number;
-  mouseInteraction?: boolean;
-  parallaxStrength?: number;
-  grain?: boolean;
-  grainIntensity?: number;
-  className?: string;
+  horizonColor?: string
+  waveColor?: string
+  crestColor?: string
+  speed?: number
+  amplitude?: number
+  waveScale?: number
+  waveRatio?: number
+  swell?: number
+  turbulence?: number
+  tilt?: number
+  zoom?: number
+  height?: number
+  fogDepth?: number
+  detail?: string
+  brightness?: number
+  opacity?: number
+  mouseInteraction?: boolean
+  parallaxStrength?: number
+  grain?: boolean
+  grainIntensity?: number
+  className?: string
+  /** Called once the first frame has been drawn. */
+  onReady?: () => void
 }
 
+/**
+ * Ray-marched wave background (WebGL 2). Rendered at 1x resolution to keep the per-pixel ray march cheap,
+ * paused while off screen or while the tab is hidden. Callers mount it lazily and skip it for reduced motion.
+ */
 const GradientWaves = ({
-  horizonColor = '#5227FF',
-  waveColor = '#FF9FFC',
-  crestColor = '#FFFFFF',
+  horizonColor = "#5227FF",
+  waveColor = "#FF9FFC",
+  crestColor = "#FFFFFF",
   speed = 0.4,
   amplitude = 2.5,
   waveScale = 0.6,
@@ -166,39 +176,47 @@ const GradientWaves = ({
   zoom = 1.0,
   height = 5.5,
   fogDepth = 15,
-  detail = 'medium',
+  detail = "medium",
   brightness = 1.0,
   opacity = 1.0,
   mouseInteraction = true,
   parallaxStrength = 0.5,
   grain = true,
   grainIntensity = 0.05,
-  className = ''
+  className = "",
+  onReady,
 }: GradientWavesProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const enableMouseRef = useRef(mouseInteraction);
+  const containerRef = useRef<HTMLDivElement>(null)
+  const enableMouseRef = useRef(mouseInteraction)
+  const onReadyRef = useRef(onReady)
+  onReadyRef.current = onReady
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const container = containerRef.current
+    if (!container) return
 
     const renderer = new Renderer({
       webgl: 2,
       alpha: true,
       premultipliedAlpha: true,
       antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2)
-    });
+      dpr: 1,
+    })
 
-    const gl = renderer.gl;
-    gl.clearColor(0, 0, 0, 0);
-    const canvas = gl.canvas;
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.display = 'block';
-    container.appendChild(canvas);
+    const gl = renderer.gl
+    if (!gl || !renderer.isWebgl2) {
+      // The shader needs WebGL 2; the static CSS backdrop stays in place instead.
+      gl?.getExtension("WEBGL_lose_context")?.loseContext()
+      return
+    }
+    gl.clearColor(0, 0, 0, 0)
+    const canvas = gl.canvas
+    canvas.style.width = "100%"
+    canvas.style.height = "100%"
+    canvas.style.display = "block"
+    container.appendChild(canvas)
 
-    const geometry = new Triangle(gl);
+    const geometry = new Triangle(gl)
     const program = new Program(gl, {
       vertex,
       fragment,
@@ -225,144 +243,151 @@ const GradientWaves = ({
         uEnableMouse: { value: mouseInteraction },
         uHorizonColor: { value: new Float32Array(hexToRgb(horizonColor)) },
         uWaveColor: { value: new Float32Array(hexToRgb(waveColor)) },
-        uCrestColor: { value: new Float32Array(hexToRgb(crestColor)) }
-      }
-    });
+        uCrestColor: { value: new Float32Array(hexToRgb(crestColor)) },
+      },
+    })
 
-    const mesh = new Mesh(gl, { geometry, program });
-    ctxMap.set(container, { renderer, program, mesh });
+    const mesh = new Mesh(gl, { geometry, program })
+    ctxMap.set(container, { renderer, program, mesh })
 
+    let announced = false
     const setSize = () => {
-      const rect = container.getBoundingClientRect();
-      const w = Math.max(1, Math.floor(rect.width));
-      const h = Math.max(1, Math.floor(rect.height));
-      renderer.setSize(w, h);
-      const res = program.uniforms.iResolution.value;
-      res[0] = gl.drawingBufferWidth;
-      res[1] = gl.drawingBufferHeight;
-      renderer.render({ scene: mesh });
-    };
+      const rect = container.getBoundingClientRect()
+      const w = Math.max(1, Math.floor(rect.width))
+      const h = Math.max(1, Math.floor(rect.height))
+      renderer.setSize(w, h)
+      const res = program.uniforms.iResolution.value
+      res[0] = gl.drawingBufferWidth
+      res[1] = gl.drawingBufferHeight
+      renderer.render({ scene: mesh })
+      if (!announced) {
+        announced = true
+        onReadyRef.current?.()
+      }
+    }
 
-    const ro = new ResizeObserver(setSize);
-    ro.observe(container);
-    setSize();
+    const ro = new ResizeObserver(setSize)
+    ro.observe(container)
+    setSize()
 
-    const currentMouse = [0.5, 0.5];
-    const targetMouse = [0.5, 0.5];
+    const currentMouse = [0.5, 0.5]
+    const targetMouse = [0.5, 0.5]
 
-    const onPointerMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      targetMouse[0] = (e.clientX - rect.left) / rect.width;
-      targetMouse[1] = 1.0 - (e.clientY - rect.top) / rect.height;
-    };
+    const onPointerMove = (e: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect()
+      targetMouse[0] = (e.clientX - rect.left) / rect.width
+      targetMouse[1] = 1.0 - (e.clientY - rect.top) / rect.height
+    }
     const onPointerLeave = () => {
-      targetMouse[0] = 0.5;
-      targetMouse[1] = 0.5;
-    };
-    canvas.addEventListener('pointermove', onPointerMove);
-    canvas.addEventListener('pointerleave', onPointerLeave);
+      targetMouse[0] = 0.5
+      targetMouse[1] = 0.5
+    }
+    canvas.addEventListener("pointermove", onPointerMove)
+    canvas.addEventListener("pointerleave", onPointerLeave)
 
-    let raf = 0;
-    let isVisible = true;
-    let isPageVisible = !document.hidden;
-    const t0 = performance.now();
+    let raf = 0
+    let isVisible = true
+    let isPageVisible = !document.hidden
+    const t0 = performance.now()
 
     const loop = (t: number) => {
-      program.uniforms.iTime.value = (t - t0) * 0.001;
-      const tx = enableMouseRef.current ? targetMouse[0] : 0.5;
-      const ty = enableMouseRef.current ? targetMouse[1] : 0.5;
-      currentMouse[0] += 0.05 * (tx - currentMouse[0]);
-      currentMouse[1] += 0.05 * (ty - currentMouse[1]);
-      program.uniforms.uMouse.value[0] = currentMouse[0];
-      program.uniforms.uMouse.value[1] = currentMouse[1];
-      renderer.render({ scene: mesh });
-      raf = requestAnimationFrame(loop);
-    };
+      program.uniforms.iTime.value = (t - t0) * 0.001
+      const tx = enableMouseRef.current ? targetMouse[0] : 0.5
+      const ty = enableMouseRef.current ? targetMouse[1] : 0.5
+      currentMouse[0] += 0.05 * (tx - currentMouse[0])
+      currentMouse[1] += 0.05 * (ty - currentMouse[1])
+      program.uniforms.uMouse.value[0] = currentMouse[0]
+      program.uniforms.uMouse.value[1] = currentMouse[1]
+      renderer.render({ scene: mesh })
+      raf = requestAnimationFrame(loop)
+    }
 
     const tryStart = () => {
-      if (isVisible && isPageVisible && raf === 0) raf = requestAnimationFrame(loop);
-    };
+      if (isVisible && isPageVisible && raf === 0)
+        raf = requestAnimationFrame(loop)
+    }
     const tryStop = () => {
       if (raf !== 0) {
-        cancelAnimationFrame(raf);
-        raf = 0;
+        cancelAnimationFrame(raf)
+        raf = 0
       }
-    };
+    }
 
     const io = new IntersectionObserver(
       ([entry]) => {
-        isVisible = entry.isIntersecting;
-        isVisible ? tryStart() : tryStop();
+        isVisible = entry.isIntersecting
+        if (isVisible) tryStart()
+        else tryStop()
       },
-      { threshold: 0 }
-    );
-    io.observe(container);
+      { threshold: 0 },
+    )
+    io.observe(container)
 
     const onVisibility = () => {
-      isPageVisible = !document.hidden;
-      isPageVisible ? tryStart() : tryStop();
-    };
-    document.addEventListener('visibilitychange', onVisibility);
+      isPageVisible = !document.hidden
+      if (isPageVisible) tryStart()
+      else tryStop()
+    }
+    document.addEventListener("visibilitychange", onVisibility)
 
-    tryStart();
+    tryStart()
 
     return () => {
-      tryStop();
-      ro.disconnect();
-      io.disconnect();
-      document.removeEventListener('visibilitychange', onVisibility);
-      canvas.removeEventListener('pointermove', onPointerMove);
-      canvas.removeEventListener('pointerleave', onPointerLeave);
-      ctxMap.delete(container);
-      try {
-        container.removeChild(canvas);
-      } catch {}
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
-    };
-  }, []);
+      tryStop()
+      ro.disconnect()
+      io.disconnect()
+      document.removeEventListener("visibilitychange", onVisibility)
+      canvas.removeEventListener("pointermove", onPointerMove)
+      canvas.removeEventListener("pointerleave", onPointerLeave)
+      ctxMap.delete(container)
+      if (canvas.parentNode === container) container.removeChild(canvas)
+      gl.getExtension("WEBGL_lose_context")?.loseContext()
+    }
+    // The WebGL context is created once; prop changes are pushed into uniforms by the effect below.
+  }, [])
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const ctx = ctxMap.get(container);
-    if (!ctx) return;
-    const { program } = ctx;
-    const u = program.uniforms;
+    const container = containerRef.current
+    if (!container) return
+    const ctx = ctxMap.get(container)
+    if (!ctx) return
+    const { program } = ctx
+    const u = program.uniforms
 
-    enableMouseRef.current = mouseInteraction;
+    enableMouseRef.current = mouseInteraction
 
-    u.uSpeed.value = speed;
-    u.uAmplitude.value = amplitude;
-    u.uWaveScale.value = waveScale;
-    u.uWaveRatio.value = waveRatio;
-    u.uSwell.value = swell;
-    u.uTurbulence.value = turbulence;
-    u.uTilt.value = tilt;
-    u.uZoom.value = zoom;
-    u.uHeight.value = height;
-    u.uFogDepth.value = fogDepth;
-    u.uSteps.value = detailToSteps(detail);
-    u.uBrightness.value = brightness;
-    u.uOpacity.value = opacity;
-    u.uGrain.value = grain ? 1.0 : 0.0;
-    u.uGrainIntensity.value = grainIntensity;
-    u.uParallax.value = parallaxStrength;
-    u.uEnableMouse.value = mouseInteraction;
-    const hc = u.uHorizonColor.value;
-    const wc = u.uWaveColor.value;
-    const cc = u.uCrestColor.value;
-    const h = hexToRgb(horizonColor);
-    const w = hexToRgb(waveColor);
-    const cr = hexToRgb(crestColor);
-    hc[0] = h[0];
-    hc[1] = h[1];
-    hc[2] = h[2];
-    wc[0] = w[0];
-    wc[1] = w[1];
-    wc[2] = w[2];
-    cc[0] = cr[0];
-    cc[1] = cr[1];
-    cc[2] = cr[2];
+    u.uSpeed.value = speed
+    u.uAmplitude.value = amplitude
+    u.uWaveScale.value = waveScale
+    u.uWaveRatio.value = waveRatio
+    u.uSwell.value = swell
+    u.uTurbulence.value = turbulence
+    u.uTilt.value = tilt
+    u.uZoom.value = zoom
+    u.uHeight.value = height
+    u.uFogDepth.value = fogDepth
+    u.uSteps.value = detailToSteps(detail)
+    u.uBrightness.value = brightness
+    u.uOpacity.value = opacity
+    u.uGrain.value = grain ? 1.0 : 0.0
+    u.uGrainIntensity.value = grainIntensity
+    u.uParallax.value = parallaxStrength
+    u.uEnableMouse.value = mouseInteraction
+    const hc = u.uHorizonColor.value
+    const wc = u.uWaveColor.value
+    const cc = u.uCrestColor.value
+    const h = hexToRgb(horizonColor)
+    const w = hexToRgb(waveColor)
+    const cr = hexToRgb(crestColor)
+    hc[0] = h[0]
+    hc[1] = h[1]
+    hc[2] = h[2]
+    wc[0] = w[0]
+    wc[1] = w[1]
+    wc[2] = w[2]
+    cc[0] = cr[0]
+    cc[1] = cr[1]
+    cc[2] = cr[2]
   }, [
     horizonColor,
     waveColor,
@@ -383,10 +408,15 @@ const GradientWaves = ({
     grain,
     grainIntensity,
     mouseInteraction,
-    parallaxStrength
-  ]);
+    parallaxStrength,
+  ])
 
-  return <div ref={containerRef} className={`gradient-waves-container ${className}`.trim()} />;
-};
+  return (
+    <div
+      ref={containerRef}
+      className={`gradient-waves-container ${className}`.trim()}
+    />
+  )
+}
 
-export default GradientWaves;
+export default GradientWaves

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react"
 
 const vertexShaderGLSL = `
 attribute vec2 position;
@@ -7,7 +7,7 @@ void main() {
   vUv = position * 0.5 + 0.5;
   gl_Position = vec4(position, 0.0, 1.0);
 }
-`;
+`
 
 const fragmentShaderGLSL = `
 precision highp float;
@@ -79,116 +79,166 @@ void main() {
 
   gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
 }
-`;
+`
 
 function hexToRgb(hex: string): [number, number, number] {
-  const clean = hex.replace("#", "");
-  const r = parseInt(clean.slice(0, 2), 16) / 255;
-  const g = parseInt(clean.slice(2, 4), 16) / 255;
-  const b = parseInt(clean.slice(4, 6), 16) / 255;
-  return [r, g, b];
+  const clean = hex.replace("#", "")
+  const r = parseInt(clean.slice(0, 2), 16) / 255
+  const g = parseInt(clean.slice(2, 4), 16) / 255
+  const b = parseInt(clean.slice(4, 6), 16) / 255
+  return [r, g, b]
 }
+
+const DEFAULT_COLORS = ["#3b82f6", "#2563eb", "#0f172a", "#7c3aed"]
 
 interface VelarisProps {
-  height?: string;
-  className?: string;
-  bg?: string;
-  colors?: string[];
-  speed?: number;
-  grain?: number;
+  height?: string
+  className?: string
+  bg?: string
+  colors?: string[]
+  speed?: number
+  grain?: number
 }
 
+/**
+ * Animated noise gradient (WebGL 1). Renders at 1x resolution, only runs while on screen and while the tab
+ * is visible, and releases its context on unmount. Callers mount it lazily and skip it for reduced motion.
+ */
 export default function Velaris({
   height = "100%",
   className = "",
   bg = "#0f172a",
-  colors = ["#3b82f6", "#2563eb", "#0f172a", "#7c3aed"],
+  colors = DEFAULT_COLORS,
   speed = 3.5,
   grain = 0.15,
 }: VelarisProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rafRef = useRef<number>(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const colorsKey = colors.join(",")
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const gl = canvas.getContext("webgl", {
+      antialias: false,
+      powerPreference: "low-power",
+    })
+    if (!gl) return
 
-    const gl = canvas.getContext("webgl");
-    if (!gl) return;
-
-    // Compile shader
-    function compile(type: number, src: string) {
-      const s = gl!.createShader(type)!;
-      gl!.shaderSource(s, src);
-      gl!.compileShader(s);
-      return s;
+    const compile = (type: number, source: string) => {
+      const shader = gl.createShader(type)
+      if (!shader) return null
+      gl.shaderSource(shader, source)
+      gl.compileShader(shader)
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        gl.deleteShader(shader)
+        return null
+      }
+      return shader
     }
 
-    const vert = compile(gl.VERTEX_SHADER, vertexShaderGLSL);
-    const frag = compile(gl.FRAGMENT_SHADER, fragmentShaderGLSL);
-    const prog = gl.createProgram()!;
-    gl.attachShader(prog, vert);
-    gl.attachShader(prog, frag);
-    gl.linkProgram(prog);
-    gl.useProgram(prog);
+    const vert = compile(gl.VERTEX_SHADER, vertexShaderGLSL)
+    const frag = compile(gl.FRAGMENT_SHADER, fragmentShaderGLSL)
+    const program = gl.createProgram()
+    if (!vert || !frag || !program) return
+    gl.attachShader(program, vert)
+    gl.attachShader(program, frag)
+    gl.linkProgram(program)
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return
+    gl.useProgram(program)
 
     // Full-screen quad
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    const buffer = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
     gl.bufferData(
       gl.ARRAY_BUFFER,
       new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
-      gl.STATIC_DRAW
-    );
-    const pos = gl.getAttribLocation(prog, "position");
-    gl.enableVertexAttribArray(pos);
-    gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+      gl.STATIC_DRAW,
+    )
+    const position = gl.getAttribLocation(program, "position")
+    gl.enableVertexAttribArray(position)
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0)
 
-    // Uniforms
-    const uRes = gl.getUniformLocation(prog, "u_resolution");
-    const uTime = gl.getUniformLocation(prog, "u_time");
-    const uGrain = gl.getUniformLocation(prog, "u_grain");
-    const uColors = gl.getUniformLocation(prog, "u_colors");
-    const uBg = gl.getUniformLocation(prog, "u_bg");
+    const uResolution = gl.getUniformLocation(program, "u_resolution")
+    const uTime = gl.getUniformLocation(program, "u_time")
+    gl.uniform1f(gl.getUniformLocation(program, "u_grain"), grain)
+    gl.uniform3f(gl.getUniformLocation(program, "u_bg"), ...hexToRgb(bg))
+    const palette = [
+      ...colorsKey.split(","),
+      "#000000",
+      "#000000",
+      "#000000",
+      "#000000",
+    ].slice(0, 4)
+    gl.uniform3fv(
+      gl.getUniformLocation(program, "u_colors"),
+      palette.flatMap((c) => hexToRgb(c)),
+    )
 
-    // Set static uniforms
-    const bgRgb = hexToRgb(bg);
-    gl.uniform3f(uBg, ...bgRgb);
-    gl.uniform1f(uGrain, grain);
-
-    const padded = [...colors, "#000000", "#000000", "#000000", "#000000"].slice(0, 4);
-    const colorFlat = padded.flatMap((c) => hexToRgb(c));
-    gl.uniform3fv(uColors, colorFlat);
-
-    let start = performance.now();
-
-    function resize() {
-      if (!canvas || !gl) return;
-      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.uniform2f(uRes, canvas.width, canvas.height);
+    // A soft gradient gains nothing from retina resolution, so the canvas renders at 1x.
+    const resize = () => {
+      const width = Math.max(1, Math.round(canvas.clientWidth))
+      const heightPx = Math.max(1, Math.round(canvas.clientHeight))
+      if (canvas.width !== width || canvas.height !== heightPx) {
+        canvas.width = width
+        canvas.height = heightPx
+      }
+      gl.viewport(0, 0, canvas.width, canvas.height)
+      gl.uniform2f(uResolution, canvas.width, canvas.height)
     }
 
-    resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(canvas);
-
-    function render() {
-      if (!gl) return;
-      const t = ((performance.now() - start) / 1000) * speed;
-      gl.uniform1f(uTime, t);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      rafRef.current = requestAnimationFrame(render);
+    const startedAt = performance.now()
+    const draw = () => {
+      gl.uniform1f(uTime, ((performance.now() - startedAt) / 1000) * speed)
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
     }
 
-    render();
+    let frame = 0
+    let onScreen = false
+    const loop = () => {
+      draw()
+      frame = requestAnimationFrame(loop)
+    }
+    const play = () => {
+      if (frame === 0 && onScreen && !document.hidden)
+        frame = requestAnimationFrame(loop)
+    }
+    const pause = () => {
+      if (frame !== 0) {
+        cancelAnimationFrame(frame)
+        frame = 0
+      }
+    }
+
+    resize()
+    draw()
+
+    const resizeObserver = new ResizeObserver(() => {
+      resize()
+      draw()
+    })
+    resizeObserver.observe(canvas)
+
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      onScreen = entry.isIntersecting
+      if (onScreen) play()
+      else pause()
+    })
+    visibilityObserver.observe(canvas)
+
+    const onVisibilityChange = () => {
+      if (document.hidden) pause()
+      else play()
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange)
 
     return () => {
-      cancelAnimationFrame(rafRef.current);
-      ro.disconnect();
-    };
-  }, [bg, colors, speed, grain]);
+      pause()
+      resizeObserver.disconnect()
+      visibilityObserver.disconnect()
+      document.removeEventListener("visibilitychange", onVisibilityChange)
+      gl.getExtension("WEBGL_lose_context")?.loseContext()
+    }
+  }, [bg, colorsKey, speed, grain])
 
   return (
     <canvas
@@ -196,5 +246,5 @@ export default function Velaris({
       className={className}
       style={{ width: "100%", height, display: "block" }}
     />
-  );
+  )
 }
