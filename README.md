@@ -64,10 +64,11 @@ Designed motion runs for every visitor, including visitors whose operating syste
   scrolling, instant in-page jumps) and the hero wave camera no longer follows the pointer. Ambient loops run
   a little slower. The page has no scroll-scrubbed parallax, tilt or zoom.
 - **Pause animations**: one button in the footer (also reachable with the "Skip to animation controls" link)
-  stops the facts ticker, the floating app preview and glow, the FAQ illustration, both WebGL backgrounds and
-  all entrance animations. The choice is stored in `localStorage` under `vyomma:animations-paused`, applied
-  before first paint by a small script in `index.html`, and kept in step across tabs. The ticker also pauses
-  on hover and on keyboard focus.
+  stops the floating app preview and glow, the FAQ illustration, both WebGL backgrounds and all entrance
+  animations, and replaces the moving facts ticker with the facts listed once in centred, balanced rows (no
+  edge fade, separators only between facts on the same row). The choice is stored in `localStorage` under
+  `vyomma:animations-paused`, applied before first paint by a small script in `index.html`, and kept in step
+  across tabs. The moving ticker also pauses on hover and on keyboard focus.
 - **Performance guards**: the WebGL canvases render at 1x, stop while off screen, while the tab is hidden and
   while paused, and resume without jumping. Motion animates transform and opacity only, except the FAQ answer
   height. Reveals never move the layout, split text waits at most 350 ms for web fonts, and a shared in-view
@@ -80,7 +81,7 @@ Designed motion runs for every visitor, including visitors whose operating syste
 | --- | --- |
 | Header | Underline slides to the section in view, shadow fades in on scroll, mobile menu links stagger in, CTA sheen |
 | Hero | Wave shader background, headline lines slide up from a mask, subtitle reveals word by word, CTAs and stats rise in, stats count up once, app preview rises then floats with a soft glow, primary CTA sheen and arrow nudge |
-| Facts ticker | Continuous ticker, paused by hover, keyboard focus or the footer control |
+| Facts ticker | Continuous ticker that pauses on hover or keyboard focus; with animations paused the facts are listed once in centred rows |
 | Why global | Heading letters, copy and checklist stagger, image eases in, portfolio card rises and floats, donut turns into place |
 | Trust and regulation | Heading letters, copy, registrations card and rows rise in with a short stagger |
 | What you can hold | Heading letters, six cards stagger in, cards lift with a shadow and the icon grows on hover |
