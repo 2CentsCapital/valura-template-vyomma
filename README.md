@@ -107,9 +107,12 @@ caching. The repository is not linked to any Netlify site; set the variables abo
 
 ## Assets
 
-- `src/assets/app/`: Vyomma-branded app screens from the designer's export, converted to WebP. The dashboard
-  mock-up was edited to remove a named stock "deal" with a projected upside, real news headlines and unverified
-  product counts. The bank-account screen was edited to remove a bank name and an account holder's name.
+- `src/assets/app/`: Vyomma-branded app screens from the designer's export, converted to WebP and edited so they
+  show no return, upside or performance figures and no personal or account details. The dashboard mock-up lost a
+  named stock "deal" with a projected upside, real news headlines, unverified product counts, the portfolio day
+  change, watchlist and event percentage moves and the index ticker values; its greetings read "User", not a
+  person's name. The portfolio-analysis screen lost its metric values. The bank-account screen lost the bank
+  name, account holder, account number and IFSC value.
 - `src/assets/media/`: the globe and chart photo used in "Why global" and the footer wordmark, from the export.
 - `src/assets/brand/`: `valura-green.png` and `valura-white.png`, copied unchanged from the live Narnolia landing.
 - `src/components/brand/vyommaPaths.ts`: the Vyomma mark and wordmark paths from the export.
